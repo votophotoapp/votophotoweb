@@ -1,29 +1,60 @@
-import Link from "next/link";
+"use client";
+
 import { Button } from "./ui/button";
-import { createClient } from "@/lib/supabase/server";
-import { LogoutButton } from "./logout-button";
+import { GoogleSignInButton } from "./google-signin-button";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 
-export async function AuthButton() {
-  const supabase = await createClient();
+export function AuthButton() {
+  const { user, loading, signOut } = useAuth();
+  const router = useRouter();
 
-  // You can also use getUser() which will be slower.
-  const { data } = await supabase.auth.getClaims();
+  const handleGoogleSuccess = () => {
+    // User will be redirected automatically
+    router.refresh();
+  };
 
-  const user = data?.claims;
+  const handleGoogleError = (errorMessage: string) => {
+    console.error("Google auth error:", errorMessage);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/");
+  };
+
+  if (loading) {
+    return (
+      <div className="flex gap-2">
+        <Button size="sm" variant="outline" disabled>
+          Loading...
+        </Button>
+      </div>
+    );
+  }
 
   return user ? (
-    <div className="flex items-center gap-4">
-      Hey, {user.email}!
-      <LogoutButton />
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-foreground/60">Hey, {user.email}!</span>
+      <Button onClick={handleSignOut} size="sm" variant="outline">
+        Logout
+      </Button>
     </div>
   ) : (
     <div className="flex gap-2">
-      <Button asChild size="sm" variant={"outline"}>
-        <Link href="/auth/login">Sign in</Link>
-      </Button>
-      <Button asChild size="sm" variant={"default"}>
-        <Link href="/auth/sign-up">Sign up</Link>
-      </Button>
+      <GoogleSignInButton
+        onSuccess={handleGoogleSuccess}
+        onError={handleGoogleError}
+        buttonConfig={{
+          type: "standard",
+          theme: "outline",
+          size: "medium",
+          text: "signin_with",
+          shape: "pill",
+          logo_alignment: "left",
+        }}
+        showOneTap={true}
+      />
     </div>
   );
 }

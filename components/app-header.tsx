@@ -13,22 +13,21 @@ export function AppHeader({ showAuthButton = false }: AppHeaderProps) {
   const { user, loading } = useAuth();
 
   return (
-    <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
+    <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16 bg-white">
       <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
         <div className="flex gap-5 items-center font-semibold">
           <Link
             href={"/"}
-            className="flex items-center hover:opacity-80 transition-opacity"
+            className="flex items-center justify-center hover:opacity-80 transition-opacity"
           >
-            <div className="h-8 flex items-center">
-              <div className="h-full w-auto [&_svg]:h-full [&_svg]:w-auto [&_svg]:max-w-none">
-                <Image
-                  src="/images/votophoto-logo-wide.svg"
-                  alt="VotoPhoto"
-                  width={98}
-                  height={24}
-                />
-              </div>
+            <div className="h-8 flex items-center justify-center">
+              <Image
+                src="/images/votophoto-logo-wide.svg"
+                alt="VotoPhoto"
+                width={98}
+                height={24}
+                className="h-full w-auto object-contain"
+              />
             </div>
           </Link>
 
@@ -40,12 +39,6 @@ export function AppHeader({ showAuthButton = false }: AppHeaderProps) {
                 className="text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
               >
                 Contests
-              </Link>
-              <Link
-                href="/manage/profile"
-                className="text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
-              >
-                Profile
               </Link>
             </nav>
           )}

@@ -4,6 +4,8 @@ import { Button } from "./ui/button";
 import { GoogleSignInButton } from "./google-signin-button";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { User } from "lucide-react";
 
 export function AuthButton() {
   const { user, loading, signOut } = useAuth();
@@ -35,7 +37,27 @@ export function AuthButton() {
 
   return user ? (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-foreground/60">Hey, {user.email}!</span>
+      <Button
+        onClick={() => router.push("/manage/profile")}
+        size="sm"
+        variant="ghost"
+        className="text-sm flex items-center gap-2"
+      >
+        {user.user_metadata?.avatar_url || user.user_metadata?.picture ? (
+          <Image
+            src={user.user_metadata.avatar_url || user.user_metadata.picture}
+            alt="Profile"
+            width={20}
+            height={20}
+            className="w-5 h-5 rounded-full"
+          />
+        ) : (
+          <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center">
+            <User className="w-3 h-3 text-gray-500" />
+          </div>
+        )}
+        My Profile
+      </Button>
       <Button onClick={handleSignOut} size="sm" variant="outline">
         Logout
       </Button>

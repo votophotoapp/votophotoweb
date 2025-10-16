@@ -10,20 +10,21 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 interface ContestDetailPageProps {
-  params: {
+  params: Promise<{
     contestId: string;
-  };
+  }>;
 }
 
 export default async function ContestDetailPage({
   params,
 }: ContestDetailPageProps) {
+  const { contestId } = await params;
   const supabase = await createClient();
 
   const { data: contest, error } = await supabase
     .from("contest")
     .select("*")
-    .eq("id", params.contestId)
+    .eq("id", contestId)
     .single();
 
   if (error || !contest) {

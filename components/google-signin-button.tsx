@@ -97,7 +97,7 @@ export function GoogleSignInButton({
 
         console.log("Successfully logged in with Google:", data);
         onSuccess?.();
-        router.push("/contests");
+        router.push("/manage/contests");
       } catch (error) {
         console.error("Error logging in with Google:", error);
         const errorMessage =
@@ -121,7 +121,7 @@ export function GoogleSignInButton({
           data: { session },
         } = await supabase.auth.getSession();
         if (session) {
-          router.push("/contests");
+          router.push("/manage/contests");
           return;
         }
 

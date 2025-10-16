@@ -57,7 +57,9 @@ export default async function Contests() {
             </CardHeader>
             <CardFooter>
               <Button asChild className="w-full">
-                <Link href={`/contests/${contest.id}`}>View Contest</Link>
+                <Link href={`/manage/contests/${contest.id}`}>
+                  View Contest
+                </Link>
               </Button>
             </CardFooter>
           </Card>

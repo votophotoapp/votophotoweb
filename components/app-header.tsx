@@ -36,13 +36,13 @@ export function AppHeader({ showAuthButton = false }: AppHeaderProps) {
           {user && !loading && (
             <nav className="flex items-center space-x-4">
               <Link
-                href="/contests"
+                href="/manage/contests"
                 className="text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
               >
                 Contests
               </Link>
               <Link
-                href="/profile"
+                href="/manage/profile"
                 className="text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
               >
                 Profile

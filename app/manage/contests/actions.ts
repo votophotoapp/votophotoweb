@@ -42,7 +42,7 @@ export async function createContest(formData: FormData) {
   }
 
   // Revalidate the contests page to show the new contest
-  revalidatePath("/contests");
+  revalidatePath("/manage/contests");
 
   return { success: true, data };
 }

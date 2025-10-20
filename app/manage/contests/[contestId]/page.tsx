@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ContestTitle } from "@/components/contest/contest-title";
 import { ContestUrlSection } from "@/components/contest/contest-url-section";
+import { ContestCategories } from "@/components/contest/contest-categories";
+import { DeleteContestDialog } from "@/components/contest/delete-contest-dialog";
 import { getBaseUrl } from "@/lib/utils";
 
 interface ContestDetailPageProps {
@@ -28,6 +30,25 @@ export default async function ContestDetailPage({
     notFound();
   }
 
+  // Fetch contest categories
+  const { data: rawCategories } = await supabase
+    .from("contest_category")
+    .select("*")
+    .eq("contest_id", contestId)
+    .order("sort_order", { ascending: true });
+
+  // Sort categories: if all sort_orders are 0, sort alphabetically
+  const categories = rawCategories
+    ? [...rawCategories].sort((a, b) => {
+        // If both have the same sort_order (likely 0), sort alphabetically
+        if (a.sort_order === b.sort_order) {
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        }
+        // Otherwise sort by sort_order
+        return a.sort_order - b.sort_order;
+      })
+    : [];
+
   const contestUrl = `${getBaseUrl()}/c/${contest.id}`;
 
   return (
@@ -46,7 +67,9 @@ export default async function ContestDetailPage({
           </Card>
           <Card className="text-center">
             <CardContent className="pt-6">
-              <div className="text-4xl font-bold">1</div>
+              <div className="text-4xl font-bold">
+                {categories?.length || 0}
+              </div>
               <p className="text-sm text-muted-foreground">Categories</p>
             </CardContent>
           </Card>
@@ -61,28 +84,29 @@ export default async function ContestDetailPage({
         {/* Contest URL Section */}
         <ContestUrlSection contestUrl={contestUrl} contestId={contestId} />
 
-        {/* Count Votes Button */}
-        <div className="text-center">
-          <Button size="lg" className="px-8 py-4 text-lg">
-            Count Votes and Reveal Winner!
-          </Button>
-        </div>
-
         {/* Categories Section */}
-        <Card>
+        <ContestCategories
+          contestId={contestId}
+          initialCategories={categories || []}
+        />
+
+        {/* Count Votes Button */}
+        <Card className="border-positive">
           <CardHeader>
-            <CardTitle>Categories</CardTitle>
+            <CardTitle className="text-positive">Voting</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 border rounded">
-              <span>Best Costume</span>
-              <Button variant="outline" size="sm">
-                Remove
+            <div className="p-4 border border-positive/20 rounded bg-positive/5 space-y-3">
+              <div className="space-y-1">
+                <h4 className="text-sm font-medium">Finish Contest</h4>
+                <p className="text-sm text-muted-foreground">
+                  Click the button below to count votes and reveal the winners.
+                </p>
+              </div>
+              <Button variant="default" size="sm">
+                Count Votes and Reveal Winners
               </Button>
             </div>
-            <Button variant="link" className="p-0 h-auto text-blue-600">
-              Add Category
-            </Button>
           </CardContent>
         </Card>
 
@@ -94,6 +118,28 @@ export default async function ContestDetailPage({
           <CardContent>
             <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
               <p className="text-muted-foreground">No submissions yet</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Danger Zone */}
+        <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle className="text-destructive">Danger Zone</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-4 border border-destructive/20 rounded bg-destructive/5 space-y-3">
+              <div className="space-y-1">
+                <h4 className="text-sm font-medium">Delete Contest</h4>
+                <p className="text-sm text-muted-foreground">
+                  Permanently delete this contest and all associated data. This
+                  action cannot be undone.
+                </p>
+              </div>
+              <DeleteContestDialog
+                contestId={contestId}
+                contestTitle={contest.title}
+              />
             </div>
           </CardContent>
         </Card>

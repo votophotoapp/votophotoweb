@@ -78,7 +78,7 @@ export async function updateContestTitle(contestId: string, title: string) {
 
   if (!data || data.length === 0) {
     throw new Error(
-      "Contest not found or you don't have permission to edit it",
+      "Contest not found or you don't have permission to edit it"
     );
   }
 
@@ -86,4 +86,34 @@ export async function updateContestTitle(contestId: string, title: string) {
   revalidatePath(`/manage/contests/${contestId}`);
 
   return { success: true, data: data[0] };
+}
+
+export async function deleteContest(contestId: string) {
+  const supabase = await createClient();
+
+  // Get the current user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("User not authenticated");
+  }
+
+  // Delete the contest, but only if the user owns it
+  const { error } = await supabase
+    .from("contest")
+    .delete()
+    .eq("id", contestId)
+    .eq("user_id", user.id); // Ensure user can only delete their own contests
+
+  if (error) {
+    throw new Error("Failed to delete contest: " + error.message);
+  }
+
+  // Revalidate the contests page to remove the deleted contest
+  revalidatePath("/manage/contests");
+
+  return { success: true };
 }

@@ -25,3 +25,11 @@ export function generateContestId(): string {
 export function generateId(length: number = 12): string {
   return nanoidLong(length);
 }
+
+/**
+ * Generates a unique category ID with "cat_" prefix
+ * @returns A unique string with "cat_" prefix and 12 random alphanumeric characters (e.g. "cat_A1b2C3d4E5f6")
+ */
+export function generateCategoryId(): string {
+  return `cat_${generateId(12)}`;
+}

@@ -1,13 +1,14 @@
 import { nanoid } from "nanoid";
 
 /**
- * Generates a short, URL-safe unique ID for contests
- * Uses nanoid with a length of 6 characters plus year prefix for readability
- * @returns A unique string with "con_" prefix, 2-digit year, and 6 characters
+ * Generates a compact, URL-safe contest ID.
+ * Format: "c" + 2-digit year + 4 random nanoid characters (e.g. "c24a1b2c").
+ * Uses nanoid(4) for brevity and readability.
+ * @returns A unique string with 'c' prefix, 2-digit year, and 4 random characters
  */
 export function generateContestId(): string {
   const year = new Date().getFullYear().toString().slice(-2);
-  return `con_${year}${nanoid(6)}`;
+  return `c${year}${nanoid(4)}`;
 }
 
 /**

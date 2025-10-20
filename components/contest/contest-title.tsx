@@ -93,12 +93,13 @@ export function ContestTitle({ initialTitle, contestId }: ContestTitleProps) {
   return (
     <div className="space-y-2">
       <h1 className="text-3xl font-bold">{title}</h1>
-      <button
+      <Button
+        variant="link"
+        className="p-0 h-auto text-blue-600"
         onClick={handleEdit}
-        className="text-blue-600 hover:text-blue-800 text-sm underline"
       >
         Edit
-      </button>
+      </Button>
     </div>
   );
 }

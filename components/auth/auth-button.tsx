@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { GoogleSignInButton } from "./google-signin-button";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";

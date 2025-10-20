@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AuthButton } from "@/components/auth-button";
+import { AuthButton } from "@/components/auth/auth-button";
 import { useAuth } from "@/lib/auth-context";
 import Image from "next/image";
 

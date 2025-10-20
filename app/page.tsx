@@ -1,4 +1,4 @@
-import { Hero } from "@/components/hero";
+import { Hero } from "@/components/marketing/hero";
 import { AppHeader } from "@/components/app-header";
 
 export default function Home() {

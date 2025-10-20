@@ -46,3 +46,44 @@ export async function createContest(formData: FormData) {
 
   return { success: true, data };
 }
+
+export async function updateContestTitle(contestId: string, title: string) {
+  const supabase = await createClient();
+
+  // Get the current user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("User not authenticated");
+  }
+
+  if (!title || title.trim() === "") {
+    throw new Error("Contest title is required");
+  }
+
+  // Update the contest title, but only if the user owns it
+  const { data, error } = await supabase
+    .from("contest")
+    .update({ title: title.trim() })
+    .eq("id", contestId)
+    .eq("user_id", user.id) // Ensure user can only update their own contests
+    .select();
+
+  if (error) {
+    throw new Error("Failed to update contest title: " + error.message);
+  }
+
+  if (!data || data.length === 0) {
+    throw new Error(
+      "Contest not found or you don't have permission to edit it"
+    );
+  }
+
+  // Revalidate the contest page to show the updated title
+  revalidatePath(`/manage/contests/${contestId}`);
+
+  return { success: true, data: data[0] };
+}

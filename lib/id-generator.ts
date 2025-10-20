@@ -1,21 +1,27 @@
-import { nanoid } from "nanoid";
+import { customAlphabet } from "nanoid";
+
+// Alphanumeric character set (letters and numbers only)
+const alphabet =
+  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+const nanoid = customAlphabet(alphabet, 4);
+const nanoidLong = customAlphabet(alphabet, 12);
 
 /**
- * Generates a compact, URL-safe contest ID.
- * Format: "c" + 2-digit year + 4 random nanoid characters (e.g. "c24a1b2c").
- * Uses nanoid(4) for brevity and readability.
- * @returns A unique string with 'c' prefix, 2-digit year, and 4 random characters
+ * Generates a compact, alphanumeric contest ID.
+ * Format: 2-digit year + 4 random alphanumeric characters (e.g. "24A1b2c").
+ * Uses only letters and numbers for compatibility.
+ * @returns A unique string with 2-digit year and 4 random alphanumeric characters
  */
 export function generateContestId(): string {
   const year = new Date().getFullYear().toString().slice(-2);
-  return `c${year}${nanoid(4)}`;
+  return `${year}${nanoid()}`;
 }
 
 /**
- * Generates a longer ID for other entities if needed
+ * Generates a longer alphanumeric ID for other entities if needed
  * @param length - The length of the ID (default: 12)
- * @returns A unique string of specified length
+ * @returns A unique alphanumeric string of specified length
  */
 export function generateId(length: number = 12): string {
-  return nanoid(length);
+  return nanoidLong(length);
 }

@@ -13,7 +13,7 @@ declare global {
           prompt: () => void;
           renderButton: (
             element: HTMLElement,
-            config: GoogleButtonConfig
+            config: GoogleButtonConfig,
           ) => void;
         };
       };
@@ -47,7 +47,7 @@ interface CredentialResponse {
 // Generate nonce for security
 const generateNonce = async (): Promise<[string, string]> => {
   const nonce = btoa(
-    String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))
+    String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))),
   );
   const encoder = new TextEncoder();
   const encodedNonce = encoder.encode(nonce);
@@ -105,7 +105,7 @@ export function GoogleSignInButton({
         onError?.(errorMessage);
       }
     },
-    [supabase, onSuccess, onError, router]
+    [supabase, onSuccess, onError, router],
   );
 
   useEffect(() => {
@@ -141,7 +141,7 @@ export function GoogleSignInButton({
         if (buttonRef.current) {
           window.google.accounts.id.renderButton(
             buttonRef.current,
-            buttonConfig
+            buttonConfig,
           );
         }
 

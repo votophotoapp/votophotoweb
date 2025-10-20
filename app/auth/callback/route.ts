@@ -25,7 +25,7 @@ export async function GET(request: Request) {
         await storeGoogleTokens(
           provider_token,
           provider_refresh_token || undefined,
-          user.id
+          user.id,
         );
       }
 

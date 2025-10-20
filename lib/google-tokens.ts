@@ -11,7 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function storeGoogleTokens(
   accessToken: string,
   refreshToken?: string,
-  userId?: string
+  userId?: string,
 ) {
   try {
     // Option 1: Store in Supabase user metadata (recommended for most cases)
@@ -140,7 +140,7 @@ export async function refreshGoogleToken() {
       await storeGoogleTokens(
         data.access_token,
         tokens.refreshToken,
-        user.user.id
+        user.user.id,
       );
     }
 

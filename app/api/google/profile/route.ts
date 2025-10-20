@@ -21,7 +21,7 @@ export async function GET() {
     if (!tokens?.accessToken) {
       return NextResponse.json(
         { error: "No Google access token found. Please sign in with Google." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -34,7 +34,7 @@ export async function GET() {
             Authorization: `Bearer ${tokens.accessToken}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.status === 401) {
@@ -50,7 +50,7 @@ export async function GET() {
                 Authorization: `Bearer ${newAccessToken}`,
                 "Content-Type": "application/json",
               },
-            }
+            },
           );
 
           if (!retryResponse.ok) {
@@ -65,7 +65,7 @@ export async function GET() {
               error:
                 "Token expired and refresh failed. Please sign in again with Google.",
             },
-            { status: 401 }
+            { status: 401 },
           );
         }
       }
@@ -80,14 +80,14 @@ export async function GET() {
       console.error("Google API request failed:", apiError);
       return NextResponse.json(
         { error: "Failed to fetch Google profile data" },
-        { status: 500 }
+        { status: 500 },
       );
     }
   } catch (error) {
     console.error("API route error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

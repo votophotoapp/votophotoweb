@@ -4,7 +4,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "format": "prettier --write '{app,components,lib}/**/*.{ts,tsx,js,jsx,json}'",
     "format:check": "prettier --check '{app,components,lib}/**/*.{ts,tsx,js,jsx,json}'",
@@ -30,7 +30,6 @@
     "tailwind-merge": "^3.3.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19",

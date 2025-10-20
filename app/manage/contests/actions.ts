@@ -78,7 +78,7 @@ export async function updateContestTitle(contestId: string, title: string) {
 
   if (!data || data.length === 0) {
     throw new Error(
-      "Contest not found or you don't have permission to edit it"
+      "Contest not found or you don't have permission to edit it",
     );
   }
 

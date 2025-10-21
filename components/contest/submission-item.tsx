@@ -26,7 +26,7 @@ export function SubmissionItem({
 
   const content = (
     <div className="flex min-h-32">
-      <div className="relative w-48 flex-shrink-0">
+      <div className="relative w-32 sm:w-48 flex-shrink-0">
         <Image
           src={submission.image_url}
           alt={submission.title}

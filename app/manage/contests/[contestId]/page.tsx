@@ -63,7 +63,7 @@ export default async function ContestDetailPage({
           name
         )
       )
-    `,
+    `
     )
     .eq("contest_id", contestId)
     .order("created_at", { ascending: false });
@@ -76,24 +76,24 @@ export default async function ContestDetailPage({
         submission.category_submission
           ?.map((cs) => cs.contest_category)
           .filter(
-            (cat): cat is { id: string; name: string } => cat !== undefined,
+            (cat): cat is { id: string; name: string } => cat !== undefined
           ) || [],
-    }),
+    })
   );
 
   const contestUrl = `${getBaseUrl()}/c/${contest.id}`;
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-4">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Contest Title Section */}
         <ContestTitle initialTitle={contest.title} contestId={contestId} />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card className="text-center">
             <CardContent className="pt-6">
-              <div className="text-4xl font-bold">
+              <div className="text-3xl md:text-4xl font-bold">
                 {submissions?.length || 0}
               </div>
               <p className="text-sm text-muted-foreground">Photos submitted</p>
@@ -101,7 +101,7 @@ export default async function ContestDetailPage({
           </Card>
           <Card className="text-center">
             <CardContent className="pt-6">
-              <div className="text-4xl font-bold">
+              <div className="text-3xl md:text-4xl font-bold">
                 {categories?.length || 0}
               </div>
               <p className="text-sm text-muted-foreground">Categories</p>
@@ -109,7 +109,7 @@ export default async function ContestDetailPage({
           </Card>
           <Card className="text-center">
             <CardContent className="pt-6">
-              <div className="text-4xl font-bold">0</div>
+              <div className="text-3xl md:text-4xl font-bold">0</div>
               <p className="text-sm text-muted-foreground">Guests voted</p>
             </CardContent>
           </Card>

@@ -39,7 +39,7 @@ export default function CreateContestDialog() {
       <DialogTrigger asChild>
         <Button>Create New Contest</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto top-[45%] sm:top-[50%]">
         <DialogHeader>
           <DialogTitle>Create New Contest</DialogTitle>
           <DialogDescription>

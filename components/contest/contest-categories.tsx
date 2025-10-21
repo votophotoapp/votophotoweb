@@ -22,31 +22,22 @@ import {
   updateContestCategory,
   reorderContestCategories,
 } from "@/app/manage/contests/[contestId]/category-actions";
-
-interface Category {
-  contest_id: string;
-  category_id: string;
-  name: string;
-  sort_order: number;
-  created_at?: string;
-  updated_at?: string;
-}
+import { ContestCategory } from "@/lib/database-types";
 
 interface ContestCategoriesProps {
   contestId: string;
-  initialCategories?: Category[];
+  initialCategories?: ContestCategory[];
 }
 
 export function ContestCategories({
   contestId,
   initialCategories = [],
 }: ContestCategoriesProps) {
-  const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [categories, setCategories] =
+    useState<ContestCategory[]>(initialCategories);
 
   const [newCategoryName, setNewCategoryName] = useState("");
-  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
-    null
-  );
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editingCategoryName, setEditingCategoryName] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -54,7 +45,7 @@ export function ContestCategories({
   const [error, setError] = useState<string | null>(null);
 
   // Helper function to sort categories properly
-  const sortCategories = (cats: Category[]) => {
+  const sortCategories = (cats: ContestCategory[]) => {
     return [...cats].sort((a, b) => {
       // If both have the same sort_order (likely 0), sort alphabetically
       if (a.sort_order === b.sort_order) {
@@ -69,8 +60,7 @@ export function ContestCategories({
   const isCategoryNameTaken = (name: string, excludeId?: string) => {
     return categories.some(
       (cat) =>
-        cat.category_id !== excludeId &&
-        cat.name.toLowerCase() === name.toLowerCase()
+        cat.id !== excludeId && cat.name.toLowerCase() === name.toLowerCase(),
     );
   };
 
@@ -86,7 +76,7 @@ export function ContestCategories({
   const getEditCategoryError = () => {
     const trimmedName = editingCategoryName.trim();
     if (!trimmedName) return null;
-    if (isCategoryNameTaken(trimmedName, editingCategoryId || undefined)) {
+    if (isCategoryNameTaken(trimmedName, editingId || undefined)) {
       return "A category with this name already exists";
     }
     return null;
@@ -101,7 +91,7 @@ export function ContestCategories({
     try {
       // Determine the next sort_order
       const allSortOrdersAreZero = categories.every(
-        (cat) => cat.sort_order === 0
+        (cat) => cat.sort_order === 0,
       );
       const nextSortOrder = allSortOrdersAreZero
         ? 0
@@ -110,7 +100,7 @@ export function ContestCategories({
       const result = await createContestCategory(
         contestId,
         newCategoryName.trim(),
-        nextSortOrder
+        nextSortOrder,
       );
 
       if (result.success && result.data) {
@@ -126,22 +116,20 @@ export function ContestCategories({
     }
   };
 
-  const removeCategory = async (categoryId: string) => {
+  const removeCategory = async (id: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await deleteContestCategory(contestId, categoryId);
+      const result = await deleteContestCategory(contestId, id);
 
       if (result.success) {
         // Filter out the removed category
-        const remainingCategories = categories.filter(
-          (cat) => cat.category_id !== categoryId
-        );
+        const remainingCategories = categories.filter((cat) => cat.id !== id);
 
         // Check if we need to renumber (if any category has sort_order > 0)
         const hasExplicitOrdering = remainingCategories.some(
-          (cat) => cat.sort_order > 0
+          (cat) => cat.sort_order > 0,
         );
 
         if (hasExplicitOrdering && remainingCategories.length > 0) {
@@ -154,7 +142,7 @@ export function ContestCategories({
 
           // Update sort orders in the database to maintain consecutive numbering
           const categoryUpdates = renumberedCategories.map((cat) => ({
-            category_id: cat.category_id,
+            id: cat.id,
             sort_order: cat.sort_order,
           }));
 
@@ -170,61 +158,55 @@ export function ContestCategories({
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to remove category"
+        err instanceof Error ? err.message : "Failed to remove category",
       );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const startEditCategory = (category: Category) => {
-    setEditingCategoryId(category.category_id);
+  const startEditCategory = (category: ContestCategory) => {
+    setEditingId(category.id);
     setEditingCategoryName(category.name);
     setIsEditDialogOpen(true);
   };
 
   const saveEditCategory = async () => {
-    if (
-      !editingCategoryName.trim() ||
-      !editingCategoryId ||
-      getEditCategoryError()
-    )
+    if (!editingCategoryName.trim() || !editingId || getEditCategoryError())
       return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await updateContestCategory(contestId, editingCategoryId, {
+      const result = await updateContestCategory(contestId, editingId, {
         name: editingCategoryName.trim(),
       });
 
       if (result.success && result.data) {
         const updatedCategories = categories.map((cat) =>
-          cat.category_id === editingCategoryId ? result.data : cat
+          cat.id === editingId ? result.data : cat,
         );
 
         // Re-sort categories after name change (important if sort_orders are all 0)
         setCategories(sortCategories(updatedCategories));
 
-        setEditingCategoryId(null);
+        setEditingId(null);
         setEditingCategoryName("");
         setIsEditDialogOpen(false);
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to update category"
+        err instanceof Error ? err.message : "Failed to update category",
       );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const moveCategory = async (categoryId: string, direction: "up" | "down") => {
+  const moveCategory = async (id: string, direction: "up" | "down") => {
     const sortedCategories = sortCategories(categories);
-    const currentIndex = sortedCategories.findIndex(
-      (cat) => cat.category_id === categoryId
-    );
+    const currentIndex = sortedCategories.findIndex((cat) => cat.id === id);
     if (currentIndex === -1) return;
 
     const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
@@ -248,7 +230,7 @@ export function ContestCategories({
 
       // Prepare the updates for the server action
       const categoryUpdates = updatedCategories.map((cat) => ({
-        category_id: cat.category_id,
+        id: cat.id,
         sort_order: cat.sort_order,
       }));
 
@@ -259,7 +241,7 @@ export function ContestCategories({
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to reorder categories"
+        err instanceof Error ? err.message : "Failed to reorder categories",
       );
     } finally {
       setIsLoading(false);
@@ -280,7 +262,7 @@ export function ContestCategories({
         {categories.length > 0 ? (
           sortCategories(categories).map((category, index) => (
             <div
-              key={category.category_id}
+              key={category.id}
               className="flex items-center justify-between p-3 border rounded"
             >
               <span className="flex-1">{category.name}</span>
@@ -291,7 +273,7 @@ export function ContestCategories({
                     variant="ghost"
                     size="sm"
                     className="h-4 px-1"
-                    onClick={() => moveCategory(category.category_id, "up")}
+                    onClick={() => moveCategory(category.id, "up")}
                     disabled={index === 0 || isLoading}
                   >
                     <ChevronUp className="h-3 w-3" />
@@ -300,7 +282,7 @@ export function ContestCategories({
                     variant="ghost"
                     size="sm"
                     className="h-4 px-1"
-                    onClick={() => moveCategory(category.category_id, "down")}
+                    onClick={() => moveCategory(category.id, "down")}
                     disabled={
                       index === sortCategories(categories).length - 1 ||
                       isLoading
@@ -346,7 +328,7 @@ export function ContestCategories({
                       <DialogClose asChild>
                         <Button
                           variant="destructive"
-                          onClick={() => removeCategory(category.category_id)}
+                          onClick={() => removeCategory(category.id)}
                           disabled={isLoading}
                         >
                           {isLoading ? "Removing..." : "Remove"}

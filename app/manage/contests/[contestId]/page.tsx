@@ -6,7 +6,9 @@ import { ContestTitle } from "@/components/contest/contest-title";
 import { ContestUrlSection } from "@/components/contest/contest-url-section";
 import { ContestCategories } from "@/components/contest/contest-categories";
 import { DeleteContestDialog } from "@/components/contest/delete-contest-dialog";
+import { ReviewSubmissions } from "@/components/contest/review-submissions";
 import { getBaseUrl } from "@/lib/utils";
+import { SubmissionWithCategories } from "@/lib/database-types";
 
 interface ContestDetailPageProps {
   params: Promise<{
@@ -49,6 +51,36 @@ export default async function ContestDetailPage({
       })
     : [];
 
+  // Fetch contest submissions
+  const { data: rawSubmissions } = await supabase
+    .from("contest_submission")
+    .select(
+      `
+      *,
+      category_submission (
+        contest_category (
+          id,
+          name
+        )
+      )
+    `,
+    )
+    .eq("contest_id", contestId)
+    .order("created_at", { ascending: false });
+
+  // Transform the data to match our interface
+  const submissions = (rawSubmissions as SubmissionWithCategories[]).map(
+    (submission) => ({
+      ...submission,
+      categories:
+        submission.category_submission
+          ?.map((cs) => cs.contest_category)
+          .filter(
+            (cat): cat is { id: string; name: string } => cat !== undefined,
+          ) || [],
+    }),
+  );
+
   const contestUrl = `${getBaseUrl()}/c/${contest.id}`;
 
   return (
@@ -61,7 +93,9 @@ export default async function ContestDetailPage({
         <div className="grid grid-cols-3 gap-6">
           <Card className="text-center">
             <CardContent className="pt-6">
-              <div className="text-4xl font-bold">0</div>
+              <div className="text-4xl font-bold">
+                {submissions?.length || 0}
+              </div>
               <p className="text-sm text-muted-foreground">Photos submitted</p>
             </CardContent>
           </Card>
@@ -116,9 +150,10 @@ export default async function ContestDetailPage({
             <CardTitle>Review Submissions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-              <p className="text-muted-foreground">No submissions yet</p>
-            </div>
+            <ReviewSubmissions
+              contestId={contestId}
+              submissions={submissions || []}
+            />
           </CardContent>
         </Card>
 

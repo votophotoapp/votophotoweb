@@ -1,12 +1,10 @@
 "use client";
 
 import { PosterQRCode } from "@/components/contest/poster-qr-code";
+import { Contest } from "@/lib/database-types";
 
 interface PosterContentProps {
-  contest: {
-    title: string;
-    id: string;
-  };
+  contest: Contest;
   contestUrl: string;
 }
 

@@ -9,12 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import CreateContestDialog from "./create-contest-dialog";
 import Link from "next/link";
-
-interface Contest {
-  id: string;
-  title: string;
-  created_at: string;
-}
+import { Contest } from "@/lib/database-types";
 
 export default async function Contests() {
   const supabase = await createClient();

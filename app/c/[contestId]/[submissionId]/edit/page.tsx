@@ -87,28 +87,12 @@ export default async function EditSubmissionPage({
     notFound();
   }
 
-  // Fetch categories
-  const { data: categories } = await supabase
-    .from("contest_category")
-    .select("id, name, sort_order")
-    .eq("contest_id", contestId)
-    .order("sort_order", { ascending: true });
-
-  // Fetch selected categories for this submission
-  const { data: selectedCategories } = await supabase
-    .from("category_submission")
-    .select("contest_category_id")
-    .eq("contest_submission_id", submissionId);
-
-  const categoryIds =
-    selectedCategories?.map((sc) => sc.contest_category_id) || [];
-
   const existingSubmission = {
     id: submission.id,
     title: submission.title,
     description: submission.description,
     image_url: submission.image_url,
-    categories: categoryIds,
+    display_name: submission.display_name,
   };
 
   return (
@@ -135,7 +119,6 @@ export default async function EditSubmissionPage({
 
         <SubmitPhotoForm
           contestId={contestId}
-          categories={categories || []}
           existingSubmission={existingSubmission}
         />
         <DeleteSubmission

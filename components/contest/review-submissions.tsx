@@ -1,9 +1,9 @@
-import { SubmissionWithCategories } from "@/lib/database-types";
-import { SubmissionItem } from "./submission-item";
+import { ContestSubmission } from "@/lib/database-types";
+import { UserSubmissionItem } from "./user-submission-item";
 
 interface ReviewSubmissionsProps {
   contestId: string;
-  submissions: SubmissionWithCategories[];
+  submissions: ContestSubmission[];
 }
 
 export function ReviewSubmissions({
@@ -21,14 +21,13 @@ export function ReviewSubmissions({
   return (
     <div className="space-y-4">
       {submissions.map((submission) => (
-        <SubmissionItem
+        <UserSubmissionItem
           key={submission.id}
           submission={submission}
           contestId={contestId}
           showTimestamp={true}
           useCard={true}
           titleSize="lg"
-          showNoCategoriesBadge={true}
         />
       ))}
     </div>

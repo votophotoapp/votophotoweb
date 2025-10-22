@@ -13,6 +13,8 @@ interface SubmissionItemProps {
   useCard?: boolean;
   titleSize?: "lg" | "xl";
   showNoCategoriesBadge?: boolean;
+  showCategories?: boolean;
+  showEditButton?: boolean;
 }
 
 export function SubmissionItem({
@@ -22,6 +24,8 @@ export function SubmissionItem({
   useCard = false,
   titleSize = "xl",
   showNoCategoriesBadge = false,
+  showCategories = true,
+  showEditButton = true,
 }: SubmissionItemProps) {
   const titleClass = titleSize === "lg" ? "text-lg" : "text-xl font-medium";
 
@@ -55,7 +59,9 @@ export function SubmissionItem({
                 </p>
               )}
               <div className="flex flex-wrap gap-2">
-                {submission.categories && submission.categories.length > 0 ? (
+                {showCategories &&
+                submission.categories &&
+                submission.categories.length > 0 ? (
                   submission.categories.map((category) => (
                     <Badge key={category.id} variant="secondary">
                       {category.name}
@@ -65,13 +71,15 @@ export function SubmissionItem({
                   <Badge variant="outline">No categories</Badge>
                 ) : null}
               </div>
-              <div className="mt-3">
-                <Link href={`/c/${contestId}/${submission.id}/edit`}>
-                  <Button variant="outline" size="sm">
-                    Edit Submission
-                  </Button>
-                </Link>
-              </div>
+              {showEditButton && (
+                <div className="mt-3">
+                  <Link href={`/c/${contestId}/${submission.id}/edit`}>
+                    <Button variant="outline" size="sm">
+                      Edit Submission
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </CardContent>
           </>
         ) : (
@@ -82,22 +90,26 @@ export function SubmissionItem({
                 {submission.description}
               </p>
             )}
-            {submission.categories && submission.categories.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {submission.categories.map((category) => (
-                  <Badge key={category.id} variant="secondary">
-                    {category.name}
-                  </Badge>
-                ))}
+            {showCategories &&
+              submission.categories &&
+              submission.categories.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {submission.categories.map((category) => (
+                    <Badge key={category.id} variant="secondary">
+                      {category.name}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            {showEditButton && (
+              <div className="pt-2">
+                <Link href={`/c/${contestId}/${submission.id}/edit`}>
+                  <Button variant="outline" size="sm">
+                    Edit Submission
+                  </Button>
+                </Link>
               </div>
             )}
-            <div className="pt-2">
-              <Link href={`/c/${contestId}/${submission.id}/edit`}>
-                <Button variant="outline" size="sm">
-                  Edit Submission
-                </Button>
-              </Link>
-            </div>
           </>
         )}
       </div>

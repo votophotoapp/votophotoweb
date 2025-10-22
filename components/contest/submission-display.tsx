@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { SubmissionItem } from "./submission-item";
-import { SubmissionWithCategories } from "@/lib/database-types";
+import { UserSubmissionItem } from "./user-submission-item";
+import { ContestSubmission } from "@/lib/database-types";
 
 interface SubmissionDisplayProps {
   contestId: string;
-  userSubmissions: SubmissionWithCategories[];
+  userSubmissions: ContestSubmission[];
 }
 
 export function SubmissionDisplay({
@@ -21,14 +21,13 @@ export function SubmissionDisplay({
           </h2>
           <div className="space-y-6">
             {userSubmissions.map((submission) => (
-              <SubmissionItem
+              <UserSubmissionItem
                 key={submission.id}
                 submission={submission}
                 contestId={contestId}
                 showTimestamp={false}
                 useCard={false}
                 titleSize="xl"
-                showNoCategoriesBadge={false}
               />
             ))}
           </div>

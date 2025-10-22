@@ -18,17 +18,15 @@ import { Upload, Image as ImageIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { generateId } from "@/lib/id-generator";
 import imageCompression from "browser-image-compression";
-import { Category, ExistingSubmission } from "@/lib/database-types";
+import { ExistingSubmission } from "@/lib/database-types";
 
 interface SubmitPhotoFormProps {
   contestId: string;
-  categories: Category[];
   existingSubmission?: ExistingSubmission;
 }
 
 export function SubmitPhotoForm({
   contestId,
-  categories,
   existingSubmission,
 }: SubmitPhotoFormProps) {
   const router = useRouter();
@@ -37,7 +35,7 @@ export function SubmitPhotoForm({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
+  const [name, setName] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
@@ -49,8 +47,8 @@ export function SubmitPhotoForm({
     if (existingSubmission) {
       setTitle(existingSubmission.title);
       setDescription(existingSubmission.description || "");
+      setName(existingSubmission.display_name || "");
       setPreviewUrl(existingSubmission.image_url);
-      setSelectedCategory(existingSubmission.categories || []);
       setAcceptTerms(true); // Assume terms were accepted for existing submissions
     }
   }, [existingSubmission]);
@@ -92,7 +90,7 @@ export function SubmitPhotoForm({
 
     if (
       !title ||
-      selectedCategory.length === 0 ||
+      !name ||
       !acceptTerms ||
       (!selectedFile && !existingSubmission) // Require file only for new submissions
     ) {
@@ -103,10 +101,20 @@ export function SubmitPhotoForm({
     setIsLoading(true);
 
     try {
-      // Get current user (should be authenticated via useEffect)
-      const {
+      // Get current user
+      let {
         data: { user },
       } = await supabase.auth.getUser();
+
+      // Sign in anonymously if not authenticated
+      if (!user) {
+        const { data: signInData, error: signInError } =
+          await supabase.auth.signInAnonymously();
+        if (signInError) {
+          throw signInError;
+        }
+        user = signInData.user;
+      }
 
       if (!user) {
         throw new Error("User not authenticated");
@@ -137,8 +145,6 @@ export function SubmitPhotoForm({
 
         imageUrl = publicUrl;
       }
-
-      let submissionData;
 
       if (existingSubmission) {
         // First verify the submission exists and belongs to this contest
@@ -172,6 +178,7 @@ export function SubmitPhotoForm({
             title,
             description,
             image_url: imageUrl,
+            display_name: name.trim() || null,
           })
           .eq("id", existingSubmission.id)
           .eq("contest_id", contestId); // Add contest_id filter for security
@@ -180,15 +187,14 @@ export function SubmitPhotoForm({
           updateQuery = updateQuery.eq("user_id", user.id);
         }
 
-        const { data, error: dbError } = await updateQuery.select().single();
+        const { error: dbError } = await updateQuery;
 
         if (dbError) {
           throw dbError;
         }
-        submissionData = data;
       } else {
         // Create new submission
-        const { data, error: dbError } = await supabase
+        const { error: dbError } = await supabase
           .from("contest_submission")
           .insert({
             contest_id: contestId,
@@ -196,37 +202,12 @@ export function SubmitPhotoForm({
             description,
             image_url: imageUrl,
             user_id: user?.id || null,
-          })
-          .select()
-          .single();
+            display_name: name.trim() || null,
+          });
 
         if (dbError) {
           throw dbError;
         }
-        submissionData = data;
-      }
-
-      // Handle category relationships
-      if (existingSubmission) {
-        // Delete existing category relationships
-        await supabase
-          .from("category_submission")
-          .delete()
-          .eq("contest_submission_id", existingSubmission.id);
-      }
-
-      // Insert new category relationships
-      const categoryInserts = selectedCategory.map((categoryId) => ({
-        contest_submission_id: submissionData.id,
-        contest_category_id: categoryId,
-      }));
-
-      const { error: categoryError } = await supabase
-        .from("category_submission")
-        .insert(categoryInserts);
-
-      if (categoryError) {
-        throw categoryError;
       }
 
       // Redirect back to appropriate page
@@ -334,38 +315,16 @@ export function SubmitPhotoForm({
             </div>
           </div>
 
-          {/* Category Selection */}
+          {/* Name */}
           <div className="space-y-2">
-            <Label>Categories *</Label>
-            <p className="text-sm text-muted-foreground">
-              Select one or more categories for your photo (at least one
-              required)
-            </p>
-            <div className="space-y-2">
-              {categories.map((category) => (
-                <div key={category.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`category-${category.id}`}
-                    checked={selectedCategory.includes(category.id)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedCategory([...selectedCategory, category.id]);
-                      } else {
-                        setSelectedCategory(
-                          selectedCategory.filter((id) => id !== category.id),
-                        );
-                      }
-                    }}
-                  />
-                  <Label
-                    htmlFor={`category-${category.id}`}
-                    className="text-sm font-normal cursor-pointer"
-                  >
-                    {category.name}
-                  </Label>
-                </div>
-              ))}
-            </div>
+            <Label htmlFor="name">Your Name *</Label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your display name"
+              required
+            />
           </div>
 
           {/* Title */}

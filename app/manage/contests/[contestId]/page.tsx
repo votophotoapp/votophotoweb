@@ -9,7 +9,7 @@ import { DeleteContestDialog } from "@/components/contest/delete-contest-dialog"
 import { ContestStatus } from "@/components/contest/contest-status";
 import { ReviewSubmissions } from "@/components/contest/review-submissions";
 import { getBaseUrl } from "@/lib/utils";
-import { SubmissionWithCategories } from "@/lib/database-types";
+import { ContestSubmission } from "@/lib/database-types";
 
 interface ContestDetailPageProps {
   params: Promise<{
@@ -53,34 +53,11 @@ export default async function ContestDetailPage({
     : [];
 
   // Fetch contest submissions
-  const { data: rawSubmissions } = await supabase
+  const { data: submissions } = await supabase
     .from("contest_submission")
-    .select(
-      `
-      *,
-      category_submission (
-        contest_category (
-          id,
-          name
-        )
-      )
-    `,
-    )
+    .select("*")
     .eq("contest_id", contestId)
     .order("created_at", { ascending: false });
-
-  // Transform the data to match our interface
-  const submissions = (rawSubmissions as SubmissionWithCategories[]).map(
-    (submission) => ({
-      ...submission,
-      categories:
-        submission.category_submission
-          ?.map((cs) => cs.contest_category)
-          .filter(
-            (cat): cat is { id: string; name: string } => cat !== undefined,
-          ) || [],
-    }),
-  );
 
   const contestUrl = `${getBaseUrl()}/c/${contest.id}`;
 
@@ -102,7 +79,7 @@ export default async function ContestDetailPage({
           contestId={contestId}
           contestUrl={contestUrl}
           categories={categories}
-          submissions={submissions}
+          submissions={(submissions as ContestSubmission[]) || []}
         />
 
         {/* Contest Welcome Message Section */}
@@ -125,7 +102,7 @@ export default async function ContestDetailPage({
           <CardContent>
             <ReviewSubmissions
               contestId={contestId}
-              submissions={submissions || []}
+              submissions={(submissions as ContestSubmission[]) || []}
             />
           </CardContent>
         </Card>

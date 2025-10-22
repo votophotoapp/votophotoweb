@@ -48,13 +48,6 @@ export default async function SubmitPhotoPage({
     notFound();
   }
 
-  // Fetch categories
-  const { data: categories } = await supabase
-    .from("contest_category")
-    .select("id, name, sort_order")
-    .eq("contest_id", contestId)
-    .order("sort_order", { ascending: true });
-
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-2xl mx-auto">
@@ -71,7 +64,7 @@ export default async function SubmitPhotoPage({
           </p>
         </div>
 
-        <SubmitPhotoForm contestId={contestId} categories={categories || []} />
+        <SubmitPhotoForm contestId={contestId} />
       </div>
     </div>
   );

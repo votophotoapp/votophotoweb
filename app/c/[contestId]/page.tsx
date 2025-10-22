@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { SubmissionDisplay } from "@/components/contest/submission-display";
-import { SubmissionWithCategories } from "@/lib/database-types";
+import { ContestSubmission, Contest } from "@/lib/database-types";
 import { Metadata } from "next";
+import { GuestSubmissionItem } from "@/components/contest/guest-submission-item";
 
 interface ContestPageProps {
   params: Promise<{
@@ -31,59 +32,45 @@ export default async function ContestPage({ params }: ContestPageProps) {
   const { contestId } = await params;
   const supabase = await createClient();
 
-  const { data: contest, error } = await supabase
+  const { data, error } = await supabase
     .from("contest")
     .select("*")
     .eq("id", contestId)
     .single();
 
-  if (error || !contest) {
+  if (error || !data) {
     notFound();
   }
 
-  // Fetch categories
-  const { data: categories } = await supabase
-    .from("contest_category")
+  const contest: Contest = data;
+
+  // Fetch all submissions for the contest
+  const { data: submissionsData } = await supabase
+    .from("contest_submission")
     .select("*")
     .eq("contest_id", contestId)
-    .order("sort_order", { ascending: true });
+    .order("created_at", { ascending: false });
+
+  let allSubmissions: ContestSubmission[] = [];
+  if (submissionsData) {
+    allSubmissions = submissionsData as ContestSubmission[];
+  }
 
   // Fetch user's submissions if authenticated
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  let userSubmissions: SubmissionWithCategories[] = [];
+  let userSubmissions: ContestSubmission[] = [];
   if (user) {
     const { data: submissions } = await supabase
       .from("contest_submission")
-      .select(
-        `
-        *,
-        category_submission (
-          contest_category (
-            id,
-            name
-          )
-        )
-      `,
-      )
+      .select("*")
       .eq("contest_id", contestId)
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     if (submissions) {
-      // Transform the data to match our interface
-      userSubmissions = (submissions as SubmissionWithCategories[]).map(
-        (submission) => ({
-          ...submission,
-          categories:
-            submission.category_submission
-              ?.map((cs) => cs.contest_category)
-              .filter(
-                (cat): cat is { id: string; name: string } => cat !== undefined,
-              ) || [],
-        }),
-      );
+      userSubmissions = submissions as ContestSubmission[];
     }
   }
 
@@ -91,9 +78,9 @@ export default async function ContestPage({ params }: ContestPageProps) {
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-4xl font-bold mb-4">{contest.title}</h1>
-        {contest.description && (
+        {contest.welcome_message && (
           <p className="text-lg text-muted-foreground mb-8">
-            {contest.description}
+            {contest.welcome_message}
           </p>
         )}
         <SubmissionDisplay
@@ -101,17 +88,24 @@ export default async function ContestPage({ params }: ContestPageProps) {
           userSubmissions={userSubmissions}
         />
         <div className="space-y-4">
-          <h2 className="text-2xl font-semibold">Categories</h2>
-          {categories && categories.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2">
-              {categories.map((category) => (
-                <div key={category.id} className="p-4 border rounded-lg">
-                  <h3 className="text-xl font-medium">{category.name}</h3>
-                </div>
+          <div>
+            <h2 className="text-2xl font-semibold">Browse Submissions</h2>
+            <p className="text-sm text-muted-foreground">
+              Vote for your favorites in each category!
+            </p>
+          </div>
+          {allSubmissions.length > 0 ? (
+            <div className="space-y-4">
+              {allSubmissions.map((submission) => (
+                <GuestSubmissionItem
+                  key={submission.id}
+                  submission={submission}
+                  showTimestamp={true}
+                />
               ))}
             </div>
           ) : (
-            <p className="text-muted-foreground">No categories available.</p>
+            <p className="text-muted-foreground">No submissions yet.</p>
           )}
         </div>
       </div>

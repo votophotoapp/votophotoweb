@@ -27,6 +27,7 @@ export interface ContestSubmission {
   contest_id: string;
   title: string;
   user_id: string;
+  display_name?: string;
   description?: string;
   image_url: string;
 }
@@ -65,5 +66,5 @@ export interface ExistingSubmission {
   title: string;
   description?: string;
   image_url: string;
-  categories?: string[]; // Array of category IDs
+  display_name?: string;
 }

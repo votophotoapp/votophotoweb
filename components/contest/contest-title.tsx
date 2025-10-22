@@ -67,7 +67,7 @@ export function ContestTitle({ initialTitle, contestId }: ContestTitleProps) {
             value={tempTitle}
             onChange={(e) => setTempTitle(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="text-3xl font-bold h-auto py-2 flex-1"
+            className="text-base h-auto py-2 flex-1"
             autoFocus
             disabled={isLoading}
           />

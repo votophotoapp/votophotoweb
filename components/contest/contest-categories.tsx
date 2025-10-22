@@ -14,7 +14,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { ChevronUp, ChevronDown, Edit2, Trash2 } from "lucide-react";
 import {
   createContestCategory,
@@ -39,8 +38,7 @@ export function ContestCategories({
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingCategoryName, setEditingCategoryName] = useState("");
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,7 +58,7 @@ export function ContestCategories({
   const isCategoryNameTaken = (name: string, excludeId?: string) => {
     return categories.some(
       (cat) =>
-        cat.id !== excludeId && cat.name.toLowerCase() === name.toLowerCase(),
+        cat.id !== excludeId && cat.name.toLowerCase() === name.toLowerCase()
     );
   };
 
@@ -89,25 +87,23 @@ export function ContestCategories({
     setError(null);
 
     try {
-      // Determine the next sort_order
-      const allSortOrdersAreZero = categories.every(
-        (cat) => cat.sort_order === 0,
-      );
-      const nextSortOrder = allSortOrdersAreZero
-        ? 0
-        : Math.max(...categories.map((cat) => cat.sort_order), -1) + 1;
+      // Determine the next sort_order (always add to the end)
+      const nextSortOrder =
+        categories.length === 0
+          ? 1
+          : Math.max(...categories.map((cat) => cat.sort_order)) + 1;
 
       const result = await createContestCategory(
         contestId,
         newCategoryName.trim(),
-        nextSortOrder,
+        nextSortOrder
       );
 
       if (result.success && result.data) {
         const updatedCategories = sortCategories([...categories, result.data]);
         setCategories(updatedCategories);
         setNewCategoryName("");
-        setIsAddDialogOpen(false);
+        setIsAdding(false);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add category");
@@ -129,7 +125,7 @@ export function ContestCategories({
 
         // Check if we need to renumber (if any category has sort_order > 0)
         const hasExplicitOrdering = remainingCategories.some(
-          (cat) => cat.sort_order > 0,
+          (cat) => cat.sort_order > 0
         );
 
         if (hasExplicitOrdering && remainingCategories.length > 0) {
@@ -158,7 +154,7 @@ export function ContestCategories({
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to remove category",
+        err instanceof Error ? err.message : "Failed to remove category"
       );
     } finally {
       setIsLoading(false);
@@ -168,7 +164,6 @@ export function ContestCategories({
   const startEditCategory = (category: ContestCategory) => {
     setEditingId(category.id);
     setEditingCategoryName(category.name);
-    setIsEditDialogOpen(true);
   };
 
   const saveEditCategory = async () => {
@@ -185,7 +180,7 @@ export function ContestCategories({
 
       if (result.success && result.data) {
         const updatedCategories = categories.map((cat) =>
-          cat.id === editingId ? result.data : cat,
+          cat.id === editingId ? result.data : cat
         );
 
         // Re-sort categories after name change (important if sort_orders are all 0)
@@ -193,15 +188,19 @@ export function ContestCategories({
 
         setEditingId(null);
         setEditingCategoryName("");
-        setIsEditDialogOpen(false);
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to update category",
+        err instanceof Error ? err.message : "Failed to update category"
       );
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const cancelEditCategory = () => {
+    setEditingId(null);
+    setEditingCategoryName("");
   };
 
   const moveCategory = async (id: string, direction: "up" | "down") => {
@@ -241,7 +240,7 @@ export function ContestCategories({
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to reorder categories",
+        err instanceof Error ? err.message : "Failed to reorder categories"
       );
     } finally {
       setIsLoading(false);
@@ -249,7 +248,7 @@ export function ContestCategories({
   };
 
   return (
-    <Card>
+    <Card id="categories-card">
       <CardHeader>
         <CardTitle>Categories</CardTitle>
       </CardHeader>
@@ -265,79 +264,129 @@ export function ContestCategories({
               key={category.id}
               className="flex items-center justify-between p-3 border rounded"
             >
-              <span className="flex-1">{category.name}</span>
-              <div className="flex items-center gap-2">
-                {/* Reorder buttons */}
-                <div className="flex flex-col">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-4 px-1"
-                    onClick={() => moveCategory(category.id, "up")}
-                    disabled={index === 0 || isLoading}
-                  >
-                    <ChevronUp className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-4 px-1"
-                    onClick={() => moveCategory(category.id, "down")}
-                    disabled={
-                      index === sortCategories(categories).length - 1 ||
-                      isLoading
-                    }
-                  >
-                    <ChevronDown className="h-3 w-3" />
-                  </Button>
-                </div>
-
-                {/* Edit button */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => startEditCategory(category)}
-                  disabled={isLoading}
-                >
-                  <Edit2 className="h-4 w-4" />
-                </Button>
-
-                {/* Remove button */}
-                <Dialog
-                  onOpenChange={(open) => {
-                    if (open) setError(null);
-                  }}
-                >
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="sm" disabled={isLoading}>
-                      <Trash2 className="h-4 w-4" />
+              {editingId === category.id ? (
+                <div className="flex items-center gap-2 flex-1">
+                  <Input
+                    value={editingCategoryName}
+                    onChange={(e) => setEditingCategoryName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !getEditCategoryError()) {
+                        saveEditCategory();
+                      } else if (e.key === "Escape") {
+                        cancelEditCategory();
+                      }
+                    }}
+                    className={`flex-1 ${getEditCategoryError() ? "border-red-500" : ""}`}
+                    autoFocus
+                    disabled={isLoading}
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={saveEditCategory}
+                      size="sm"
+                      disabled={!!getEditCategoryError() || isLoading}
+                    >
+                      {isLoading ? "Saving..." : "Save"}
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Remove Category</DialogTitle>
-                      <DialogDescription>
-                        Are you sure you want to remove &ldquo;{category.name}
-                        &rdquo;? This action cannot be undone.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                      <DialogClose asChild>
-                        <Button variant="outline">Cancel</Button>
-                      </DialogClose>
-                      <DialogClose asChild>
+                    <Button
+                      onClick={cancelEditCategory}
+                      variant="outline"
+                      size="sm"
+                      disabled={isLoading}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                  {getEditCategoryError() && (
+                    <p className="text-sm text-red-500 absolute mt-12">
+                      {getEditCategoryError()}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <span className="flex-1">{category.name}</span>
+                  <div className="flex items-center gap-2">
+                    {/* Reorder buttons */}
+                    <div className="flex gap-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => moveCategory(category.id, "up")}
+                        disabled={index === 0 || isLoading}
+                        className="h-8 w-8 p-0"
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => moveCategory(category.id, "down")}
+                        disabled={
+                          index === sortCategories(categories).length - 1 ||
+                          isLoading
+                        }
+                        className="h-8 w-8 p-0"
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    {/* Edit button */}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => startEditCategory(category)}
+                      disabled={isLoading}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+
+                    {/* Remove button */}
+                    <Dialog
+                      onOpenChange={(open) => {
+                        if (open) setError(null);
+                      }}
+                    >
+                      <DialogTrigger asChild>
                         <Button
-                          variant="destructive"
-                          onClick={() => removeCategory(category.id)}
+                          variant="outline"
+                          size="sm"
                           disabled={isLoading}
+                          className="h-8 w-8 p-0"
                         >
-                          {isLoading ? "Removing..." : "Remove"}
+                          <Trash2 className="h-4 w-4" />
                         </Button>
-                      </DialogClose>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Remove Category</DialogTitle>
+                          <DialogDescription>
+                            Are you sure you want to remove &ldquo;
+                            {category.name}
+                            &rdquo;? This action cannot be undone.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <DialogClose asChild>
+                            <Button variant="outline">Cancel</Button>
+                          </DialogClose>
+                          <DialogClose asChild>
+                            <Button
+                              variant="destructive"
+                              onClick={() => removeCategory(category.id)}
+                              disabled={isLoading}
+                            >
+                              {isLoading ? "Removing..." : "Remove"}
+                            </Button>
+                          </DialogClose>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </>
+              )}
             </div>
           ))
         ) : (
@@ -348,117 +397,60 @@ export function ContestCategories({
           </div>
         )}
 
-        {/* Add Category Dialog */}
-        <Dialog
-          open={isAddDialogOpen}
-          onOpenChange={(open) => {
-            setIsAddDialogOpen(open);
-            if (open) setError(null);
-          }}
-        >
-          <DialogTrigger asChild>
-            <Button variant="link" className="p-0 h-auto text-blue-600">
-              Add Category
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Category</DialogTitle>
-              <DialogDescription>
-                Enter a name for the new category.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="categoryName">Category Name</Label>
-                <Input
-                  id="categoryName"
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
-                  placeholder="e.g. Best Costume, Most Creative..."
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !getAddCategoryError()) {
-                      addCategory();
-                    }
-                  }}
-                  className={getAddCategoryError() ? "border-red-500" : ""}
-                />
-                {getAddCategoryError() && (
-                  <p className="text-sm text-red-500">
-                    {getAddCategoryError()}
-                  </p>
-                )}
-              </div>
-            </div>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
+        {/* Add Category Section */}
+        {isAdding ? (
+          <div className="flex items-center gap-2 p-3 border rounded border-dashed">
+            <Input
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              placeholder="e.g. Best Costume, Most Creative..."
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !getAddCategoryError()) {
+                  addCategory();
+                } else if (e.key === "Escape") {
+                  setIsAdding(false);
+                  setNewCategoryName("");
+                }
+              }}
+              className={`flex-1 ${getAddCategoryError() ? "border-red-500" : ""}`}
+              autoFocus
+              disabled={isLoading}
+            />
+            <div className="flex gap-2">
               <Button
                 onClick={addCategory}
-                disabled={
-                  !newCategoryName.trim() ||
-                  !!getAddCategoryError() ||
-                  isLoading
-                }
+                size="sm"
+                disabled={!!getAddCategoryError() || isLoading}
               >
-                {isLoading ? "Adding..." : "Add Category"}
+                {isLoading ? "Adding..." : "Add"}
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Edit Category Dialog */}
-        <Dialog
-          open={isEditDialogOpen}
-          onOpenChange={(open) => {
-            setIsEditDialogOpen(open);
-            if (open) setError(null);
-          }}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Category</DialogTitle>
-              <DialogDescription>Update the category name.</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="editCategoryName">Category Name</Label>
-                <Input
-                  id="editCategoryName"
-                  value={editingCategoryName}
-                  onChange={(e) => setEditingCategoryName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !getEditCategoryError()) {
-                      saveEditCategory();
-                    }
-                  }}
-                  className={getEditCategoryError() ? "border-red-500" : ""}
-                />
-                {getEditCategoryError() && (
-                  <p className="text-sm text-red-500">
-                    {getEditCategoryError()}
-                  </p>
-                )}
-              </div>
-            </div>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
               <Button
-                onClick={saveEditCategory}
-                disabled={
-                  !editingCategoryName.trim() ||
-                  !!getEditCategoryError() ||
-                  isLoading
-                }
+                onClick={() => {
+                  setIsAdding(false);
+                  setNewCategoryName("");
+                }}
+                variant="outline"
+                size="sm"
+                disabled={isLoading}
               >
-                {isLoading ? "Saving..." : "Save Changes"}
+                Cancel
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </div>
+            {getAddCategoryError() && (
+              <p className="text-sm text-red-500 absolute mt-12">
+                {getAddCategoryError()}
+              </p>
+            )}
+          </div>
+        ) : (
+          <Button
+            variant="link"
+            className="p-0 h-auto text-blue-600"
+            onClick={() => setIsAdding(true)}
+          >
+            Add Category
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

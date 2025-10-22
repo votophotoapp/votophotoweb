@@ -1,3 +1,4 @@
+import { formatUtcToLocal } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,12 +43,7 @@ export function SubmissionItem({
               {showTimestamp && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span>
-                    Submitted{" "}
-                    {new Date(submission.created_at).toLocaleDateString()} at{" "}
-                    {new Date(submission.created_at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    Submitted {formatUtcToLocal(submission.created_at)}
                   </span>
                 </div>
               )}

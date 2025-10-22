@@ -9,11 +9,13 @@ import { Trash2 } from "lucide-react";
 interface DeleteSubmissionProps {
   contestId: string;
   submissionId: string;
+  redirectTo?: string;
 }
 
 export function DeleteSubmission({
   contestId,
   submissionId,
+  redirectTo,
 }: DeleteSubmissionProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
@@ -21,7 +23,7 @@ export function DeleteSubmission({
 
   const handleDelete = async () => {
     const confirmed = window.confirm(
-      "Are you absolutely sure you want to delete this submission? This action cannot be undone.",
+      "Are you absolutely sure you want to delete this submission? This action cannot be undone."
     );
 
     if (!confirmed) return;
@@ -38,8 +40,12 @@ export function DeleteSubmission({
         throw error;
       }
 
-      // Redirect back to contest page
-      router.push(`/c/${contestId}`);
+      if (redirectTo) {
+        router.push(redirectTo);
+      } else {
+        // Redirect back to contest page
+        router.push(`/c/${contestId}`);
+      }
     } catch (error) {
       console.error("Error deleting submission:", error);
       alert("Failed to delete submission. Please try again.");

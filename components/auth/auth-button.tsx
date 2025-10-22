@@ -56,7 +56,7 @@ export function AuthButton() {
             <User className="w-3 h-3 text-gray-500" />
           </div>
         )}
-        My Profile
+        {user.user_metadata?.name || "My Profile"}
       </Button>
       <Button onClick={handleSignOut} size="sm" variant="outline">
         Logout

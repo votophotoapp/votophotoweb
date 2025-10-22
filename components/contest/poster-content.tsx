@@ -46,7 +46,7 @@ export function PosterContent({ contest, contestUrl }: PosterContentProps) {
         </div>
 
         {/* Main poster content */}
-        <div className="print-container max-w-4xl mx-auto p-8 space-y-8 print:p-6 print:max-w-none print:space-y-6">
+        <div className="print-container max-w-5xl mx-auto p-8 space-y-8 print:p-6 print:max-w-none print:space-y-6">
           {/* Header */}
           <div className="text-center space-y-4 print:space-y-3">
             <h1 className="text-5xl font-bold text-gray-900 print:text-4xl print:leading-tight">

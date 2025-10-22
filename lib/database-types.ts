@@ -5,8 +5,11 @@ export interface Contest {
   id: string;
   created_at: string;
   title?: string;
-  description?: string;
+  welcome_message?: string;
   user_id: string;
+  votes_counted_at: string | null;
+  contest_started_at: string | null;
+  contest_ended_at: string | null;
 }
 
 export interface ContestCategory {

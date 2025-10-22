@@ -22,9 +22,9 @@ export function AppHeader({ showAuthButton = false }: AppHeaderProps) {
           >
             <div className="h-8 flex items-center justify-center">
               <Image
-                src="/images/votophoto-logo-wide.svg"
+                src="/images/votophoto-logo-square.svg"
                 alt="VotoPhoto"
-                width={98}
+                width={24}
                 height={24}
                 className="h-full w-auto object-contain"
               />
@@ -38,7 +38,7 @@ export function AppHeader({ showAuthButton = false }: AppHeaderProps) {
                 href="/manage/contests"
                 className="text-sm font-medium text-foreground/60 hover:text-foreground transition-colors"
               >
-                Contests
+                My Contests
               </Link>
             </nav>
           )}

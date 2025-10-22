@@ -1,5 +1,6 @@
 import { Hero } from "@/components/marketing/hero";
 import { AppHeader } from "@/components/app-header";
+import { Footer } from "@/components/footer";
 import {
   Card,
   CardContent,
@@ -73,9 +74,7 @@ export default function Home() {
           </main>
         </div>
 
-        <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-          <p>Built with care in Roswell, GA</p>
-        </footer>
+        <Footer />
       </div>
     </main>
   );

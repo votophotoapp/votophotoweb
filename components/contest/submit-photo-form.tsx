@@ -56,7 +56,7 @@ export function SubmitPhotoForm({
   }, [existingSubmission]);
 
   const handleFileSelect = async (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -151,7 +151,7 @@ export function SubmitPhotoForm({
 
         if (checkError || !existingCheck) {
           throw new Error(
-            "Submission not found or does not belong to this contest",
+            "Submission not found or does not belong to this contest"
           );
         }
 
@@ -241,7 +241,7 @@ export function SubmitPhotoForm({
 
         const isContestOwner = !!contestOwnerCheck;
         router.push(
-          isContestOwner ? `/manage/contests/${contestId}` : `/c/${contestId}`,
+          isContestOwner ? `/manage/contests/${contestId}` : `/c/${contestId}`
         );
       } else {
         router.push(`/c/${contestId}`);
@@ -352,7 +352,7 @@ export function SubmitPhotoForm({
                         setSelectedCategory([...selectedCategory, category.id]);
                       } else {
                         setSelectedCategory(
-                          selectedCategory.filter((id) => id !== category.id),
+                          selectedCategory.filter((id) => id !== category.id)
                         );
                       }
                     }}

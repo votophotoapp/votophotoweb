@@ -118,8 +118,13 @@ export default async function EditSubmissionPage({
           categories={categories || []}
           existingSubmission={existingSubmission}
         />
-
-        <DeleteSubmission contestId={contestId} submissionId={submissionId} />
+        <DeleteSubmission
+          contestId={contestId}
+          submissionId={submissionId}
+          redirectTo={
+            isContestOwner ? `/manage/contests/${contestId}` : `/c/${contestId}`
+          }
+        />
       </div>
     </div>
   );

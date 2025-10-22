@@ -1,3 +1,4 @@
+import { formatUtcToLocal } from "@/lib/utils";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 
@@ -24,7 +25,7 @@ export default async function ProfilePage() {
   const provider = user.app_metadata?.provider;
 
   return (
-    <div className="flex-1 w-full flex flex-col gap-8 max-w-4xl mx-auto p-6">
+    <div className="flex-1 w-full flex flex-col gap-8 max-w-5xl mx-auto p-6">
       {/* User Profile Card */}
       <Card>
         <CardHeader>
@@ -58,7 +59,7 @@ export default async function ProfilePage() {
             <div>
               <span className="font-medium">Last Sign In:</span>{" "}
               {user.last_sign_in_at
-                ? new Date(user.last_sign_in_at).toLocaleString()
+                ? formatUtcToLocal(user.last_sign_in_at)
                 : "N/A"}
             </div>
           </div>

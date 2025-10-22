@@ -47,7 +47,7 @@ export default async function ContestPage({ params }: ContestPageProps) {
             name
           )
         )
-      `,
+      `
       )
       .eq("contest_id", contestId)
       .eq("user_id", user.id)
@@ -62,16 +62,16 @@ export default async function ContestPage({ params }: ContestPageProps) {
             submission.category_submission
               ?.map((cs) => cs.contest_category)
               .filter(
-                (cat): cat is { id: string; name: string } => cat !== undefined,
+                (cat): cat is { id: string; name: string } => cat !== undefined
               ) || [],
-        }),
+        })
       );
     }
   }
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <h1 className="text-4xl font-bold mb-4">{contest.title}</h1>
         {contest.description && (
           <p className="text-lg text-muted-foreground mb-8">

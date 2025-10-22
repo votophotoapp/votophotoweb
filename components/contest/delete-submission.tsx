@@ -23,7 +23,7 @@ export function DeleteSubmission({
 
   const handleDelete = async () => {
     const confirmed = window.confirm(
-      "Are you absolutely sure you want to delete this submission? This action cannot be undone."
+      "Are you absolutely sure you want to delete this submission? This action cannot be undone.",
     );
 
     if (!confirmed) return;

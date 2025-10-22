@@ -2,11 +2,29 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { SubmissionDisplay } from "@/components/contest/submission-display";
 import { SubmissionWithCategories } from "@/lib/database-types";
+import { Metadata } from "next";
 
 interface ContestPageProps {
   params: Promise<{
     contestId: string;
   }>;
+}
+
+export async function generateMetadata({
+  params,
+}: ContestPageProps): Promise<Metadata> {
+  const { contestId } = await params;
+  const supabase = await createClient();
+
+  const { data: contest } = await supabase
+    .from("contest")
+    .select("title")
+    .eq("id", contestId)
+    .single();
+
+  return {
+    title: contest?.title ? `${contest.title} - VotoPhoto` : "VotoPhoto",
+  };
 }
 
 export default async function ContestPage({ params }: ContestPageProps) {
@@ -47,7 +65,7 @@ export default async function ContestPage({ params }: ContestPageProps) {
             name
           )
         )
-      `
+      `,
       )
       .eq("contest_id", contestId)
       .eq("user_id", user.id)
@@ -62,9 +80,9 @@ export default async function ContestPage({ params }: ContestPageProps) {
             submission.category_submission
               ?.map((cs) => cs.contest_category)
               .filter(
-                (cat): cat is { id: string; name: string } => cat !== undefined
+                (cat): cat is { id: string; name: string } => cat !== undefined,
               ) || [],
-        })
+        }),
       );
     }
   }

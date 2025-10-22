@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { AppHeader } from "@/components/app-header";
+import { GuestAppHeader } from "@/components/guest-app-header";
 import { Footer } from "@/components/footer";
 
 export default function ContestLayout({
@@ -11,6 +12,10 @@ export default function ContestLayout({
   children: React.ReactNode;
 }) {
   const [isAuthenticating, setIsAuthenticating] = useState(true);
+  const [contestTitle, setContestTitle] = useState<string>("");
+
+  const params = useParams();
+  const contestId = params.contestId as string;
 
   useEffect(() => {
     const ensureAuthenticated = async () => {
@@ -40,6 +45,29 @@ export default function ContestLayout({
     ensureAuthenticated();
   }, []);
 
+  useEffect(() => {
+    const fetchContestTitle = async () => {
+      if (!contestId) return;
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from("contest")
+          .select("title")
+          .eq("id", contestId)
+          .single();
+        if (error) {
+          console.error("Error fetching contest title:", error);
+        } else {
+          setContestTitle(data?.title || "");
+        }
+      } catch (error) {
+        console.error("Error fetching contest title:", error);
+      }
+    };
+
+    fetchContestTitle();
+  }, [contestId]);
+
   if (isAuthenticating) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -53,7 +81,7 @@ export default function ContestLayout({
 
   return (
     <main className="min-h-screen flex flex-col">
-      <AppHeader showAuthButton={true} />
+      <GuestAppHeader title={contestTitle} />
       <div className="flex-1 w-full max-w-5xl mx-auto p-5">{children}</div>
       <Footer />
     </main>

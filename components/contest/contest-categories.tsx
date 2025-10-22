@@ -58,7 +58,7 @@ export function ContestCategories({
   const isCategoryNameTaken = (name: string, excludeId?: string) => {
     return categories.some(
       (cat) =>
-        cat.id !== excludeId && cat.name.toLowerCase() === name.toLowerCase()
+        cat.id !== excludeId && cat.name.toLowerCase() === name.toLowerCase(),
     );
   };
 
@@ -96,7 +96,7 @@ export function ContestCategories({
       const result = await createContestCategory(
         contestId,
         newCategoryName.trim(),
-        nextSortOrder
+        nextSortOrder,
       );
 
       if (result.success && result.data) {
@@ -125,7 +125,7 @@ export function ContestCategories({
 
         // Check if we need to renumber (if any category has sort_order > 0)
         const hasExplicitOrdering = remainingCategories.some(
-          (cat) => cat.sort_order > 0
+          (cat) => cat.sort_order > 0,
         );
 
         if (hasExplicitOrdering && remainingCategories.length > 0) {
@@ -154,7 +154,7 @@ export function ContestCategories({
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to remove category"
+        err instanceof Error ? err.message : "Failed to remove category",
       );
     } finally {
       setIsLoading(false);
@@ -180,7 +180,7 @@ export function ContestCategories({
 
       if (result.success && result.data) {
         const updatedCategories = categories.map((cat) =>
-          cat.id === editingId ? result.data : cat
+          cat.id === editingId ? result.data : cat,
         );
 
         // Re-sort categories after name change (important if sort_orders are all 0)
@@ -191,7 +191,7 @@ export function ContestCategories({
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to update category"
+        err instanceof Error ? err.message : "Failed to update category",
       );
     } finally {
       setIsLoading(false);
@@ -240,7 +240,7 @@ export function ContestCategories({
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to reorder categories"
+        err instanceof Error ? err.message : "Failed to reorder categories",
       );
     } finally {
       setIsLoading(false);

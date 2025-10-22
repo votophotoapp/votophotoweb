@@ -4,11 +4,31 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { SubmitPhotoForm } from "@/components/contest/submit-photo-form";
+import { Metadata } from "next";
 
 interface SubmitPhotoPageProps {
   params: Promise<{
     contestId: string;
   }>;
+}
+
+export async function generateMetadata({
+  params,
+}: SubmitPhotoPageProps): Promise<Metadata> {
+  const { contestId } = await params;
+  const supabase = await createClient();
+
+  const { data: contest } = await supabase
+    .from("contest")
+    .select("title")
+    .eq("id", contestId)
+    .single();
+
+  return {
+    title: contest?.title
+      ? `Submit to ${contest.title} - VotoPhoto`
+      : "Submit Photo - VotoPhoto",
+  };
 }
 
 export default async function SubmitPhotoPage({

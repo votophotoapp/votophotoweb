@@ -64,7 +64,7 @@ export default async function ContestDetailPage({
           name
         )
       )
-    `
+    `,
     )
     .eq("contest_id", contestId)
     .order("created_at", { ascending: false });
@@ -77,9 +77,9 @@ export default async function ContestDetailPage({
         submission.category_submission
           ?.map((cs) => cs.contest_category)
           .filter(
-            (cat): cat is { id: string; name: string } => cat !== undefined
+            (cat): cat is { id: string; name: string } => cat !== undefined,
           ) || [],
-    })
+    }),
   );
 
   const contestUrl = `${getBaseUrl()}/c/${contest.id}`;

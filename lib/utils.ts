@@ -6,7 +6,7 @@ dayjs.extend(timezone);
 
 export function formatUtcToLocal(
   dateString: string | Date | undefined,
-  format = "MMMM D, YYYY h:mm A"
+  format = "MMMM D, YYYY h:mm A",
 ) {
   if (!dateString) return "";
   return dayjs.utc(dateString).tz(dayjs.tz.guess()).format(format);

@@ -26,7 +26,7 @@ export async function getContestCategories(contestId: string) {
 
   if (contestError || !contestData) {
     throw new Error(
-      "Contest not found or you don't have permission to access it"
+      "Contest not found or you don't have permission to access it",
     );
   }
 
@@ -47,7 +47,7 @@ export async function getContestCategories(contestId: string) {
 export async function createContestCategory(
   contestId: string,
   name: string,
-  sortOrder: number
+  sortOrder: number,
 ) {
   const supabase = await createClient();
 
@@ -75,7 +75,7 @@ export async function createContestCategory(
 
   if (contestError || !contestData) {
     throw new Error(
-      "Contest not found or you don't have permission to edit it"
+      "Contest not found or you don't have permission to edit it",
     );
   }
 
@@ -90,7 +90,7 @@ export async function createContestCategory(
   if (existingError && existingError.code !== "PGRST116") {
     // PGRST116 = no rows returned
     throw new Error(
-      "Failed to check for existing category: " + existingError.message
+      "Failed to check for existing category: " + existingError.message,
     );
   }
 
@@ -122,7 +122,7 @@ export async function createContestCategory(
 export async function updateContestCategory(
   contestId: string,
   id: string,
-  updates: { name?: string; sort_order?: number }
+  updates: { name?: string; sort_order?: number },
 ) {
   const supabase = await createClient();
 
@@ -146,7 +146,7 @@ export async function updateContestCategory(
 
   if (contestError || !contestData) {
     throw new Error(
-      "Contest not found or you don't have permission to edit it"
+      "Contest not found or you don't have permission to edit it",
     );
   }
 
@@ -167,7 +167,7 @@ export async function updateContestCategory(
 
     if (existingError && existingError.code !== "PGRST116") {
       throw new Error(
-        "Failed to check for existing category: " + existingError.message
+        "Failed to check for existing category: " + existingError.message,
       );
     }
 
@@ -222,7 +222,7 @@ export async function deleteContestCategory(contestId: string, id: string) {
 
   if (contestError || !contestData) {
     throw new Error(
-      "Contest not found or you don't have permission to edit it"
+      "Contest not found or you don't have permission to edit it",
     );
   }
 
@@ -245,7 +245,7 @@ export async function deleteContestCategory(contestId: string, id: string) {
 
 export async function reorderContestCategories(
   contestId: string,
-  categoryUpdates: { id: string; sort_order: number }[]
+  categoryUpdates: { id: string; sort_order: number }[],
 ) {
   const supabase = await createClient();
 
@@ -269,7 +269,7 @@ export async function reorderContestCategories(
 
   if (contestError || !contestData) {
     throw new Error(
-      "Contest not found or you don't have permission to edit it"
+      "Contest not found or you don't have permission to edit it",
     );
   }
 
@@ -288,7 +288,7 @@ export async function reorderContestCategories(
   const failedUpdate = results.find((result) => result.error);
   if (failedUpdate) {
     throw new Error(
-      "Failed to reorder categories: " + failedUpdate.error?.message
+      "Failed to reorder categories: " + failedUpdate.error?.message,
     );
   }
 

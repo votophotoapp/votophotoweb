@@ -5,12 +5,32 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { SubmitPhotoForm } from "@/components/contest/submit-photo-form";
 import { DeleteSubmission } from "@/components/contest/delete-submission";
+import { Metadata } from "next";
 
 interface EditSubmissionPageProps {
   params: Promise<{
     contestId: string;
     submissionId: string;
   }>;
+}
+
+export async function generateMetadata({
+  params,
+}: EditSubmissionPageProps): Promise<Metadata> {
+  const { contestId } = await params;
+  const supabase = await createClient();
+
+  const { data: contest } = await supabase
+    .from("contest")
+    .select("title")
+    .eq("id", contestId)
+    .single();
+
+  return {
+    title: contest?.title
+      ? `Edit Submission - ${contest.title} - VotoPhoto`
+      : "Edit Submission - VotoPhoto",
+  };
 }
 
 export default async function EditSubmissionPage({

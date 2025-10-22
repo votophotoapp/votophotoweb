@@ -78,7 +78,7 @@ export async function updateContestTitle(contestId: string, title: string) {
 
   if (!data || data.length === 0) {
     throw new Error(
-      "Contest not found or you don't have permission to edit it"
+      "Contest not found or you don't have permission to edit it",
     );
   }
 
@@ -90,7 +90,7 @@ export async function updateContestTitle(contestId: string, title: string) {
 
 export async function updateContestWelcomeMessage(
   contestId: string,
-  welcomeMessage: string
+  welcomeMessage: string,
 ) {
   const supabase = await createClient();
 
@@ -114,13 +114,13 @@ export async function updateContestWelcomeMessage(
 
   if (error) {
     throw new Error(
-      "Failed to update contest welcome message: " + error.message
+      "Failed to update contest welcome message: " + error.message,
     );
   }
 
   if (!data || data.length === 0) {
     throw new Error(
-      "Contest not found or you don't have permission to edit it"
+      "Contest not found or you don't have permission to edit it",
     );
   }
 
@@ -193,7 +193,7 @@ export async function startContest(formData: FormData) {
 
   if (!data || data.length === 0) {
     throw new Error(
-      "Contest not found or you don't have permission to start it"
+      "Contest not found or you don't have permission to start it",
     );
   }
 
@@ -234,7 +234,7 @@ export async function unendContest(formData: FormData) {
 
   if (!data || data.length === 0) {
     throw new Error(
-      "Contest not found or you don't have permission to unend it"
+      "Contest not found or you don't have permission to unend it",
     );
   }
 
@@ -275,7 +275,7 @@ export async function countVotes(formData: FormData) {
 
   if (!data || data.length === 0) {
     throw new Error(
-      "Contest not found or you don't have permission to count votes"
+      "Contest not found or you don't have permission to count votes",
     );
   }
 
@@ -316,7 +316,7 @@ export async function uncountVotes(formData: FormData) {
 
   if (!data || data.length === 0) {
     throw new Error(
-      "Contest not found or you don't have permission to uncount votes"
+      "Contest not found or you don't have permission to uncount votes",
     );
   }
 
@@ -361,7 +361,7 @@ export async function unstartContest(formData: FormData) {
 
   if (!data || data.length === 0) {
     throw new Error(
-      "Contest not found or you don't have permission to unstart it"
+      "Contest not found or you don't have permission to unstart it",
     );
   }
 

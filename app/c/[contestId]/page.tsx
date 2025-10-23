@@ -9,6 +9,8 @@ import {
 import { Metadata } from "next";
 import { GuestSubmissionItem } from "@/components/contest/guest-submission-item";
 import { YourVotes } from "@/components/contest/your-votes";
+import { Winners } from "@/components/contest/winners";
+import { getWinners, Winner } from "@/components/contest/winners-utils";
 
 interface ContestPageProps {
   params: Promise<{
@@ -115,6 +117,12 @@ export default async function ContestPage({ params }: ContestPageProps) {
     }
   }
 
+  // Fetch winners if revealed
+  let winners: Winner[] = [];
+  if (contest.winners_revealed_at !== null) {
+    winners = await getWinners(contestId, categories);
+  }
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-5xl mx-auto space-y-8">
@@ -147,6 +155,8 @@ export default async function ContestPage({ params }: ContestPageProps) {
             />
           )}
 
+        {contest.winners_revealed_at !== null && <Winners winners={winners} />}
+
         {user && contest.submissions_opened_at !== null && (
           <YourVotes
             categories={categories}
@@ -176,6 +186,7 @@ export default async function ContestPage({ params }: ContestPageProps) {
                     contestId={contestId}
                     userVotes={userVotes[submission.id] || new Set()}
                     votedCategories={votedCategories}
+                    winnersRevealedAt={contest.winners_revealed_at}
                   />
                 ))}
               </div>

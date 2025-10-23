@@ -8,8 +8,10 @@ import { ContestStats } from "@/components/contest/contest-stats";
 import { DeleteContestDialog } from "@/components/contest/delete-contest-dialog";
 import { ContestGuide } from "@/components/contest/contest-guide";
 import { ReviewSubmissions } from "@/components/contest/review-submissions";
+import { Winners } from "@/components/contest/winners";
 import { getBaseUrl } from "@/lib/utils";
 import { ContestSubmission } from "@/lib/database-types";
+import { getWinners } from "@/components/contest/winners-utils";
 
 interface ContestDetailPageProps {
   params: Promise<{
@@ -71,7 +73,7 @@ export default async function ContestDetailPage({
     .select("user_id")
     .eq("contest_id", contestId);
   const guestsSubmittedCount = new Set(
-    submittersData?.map((s) => s.user_id) || []
+    submittersData?.map((s) => s.user_id) || [],
   ).size;
 
   // Fetch unique guests who voted
@@ -81,6 +83,11 @@ export default async function ContestDetailPage({
     .in("contest_submission_id", submissions?.map((s) => s.id) || []);
   const guestsVotedCount = new Set(votersData?.map((v) => v.user_id) || [])
     .size;
+
+  // Fetch winners data if winners are revealed
+  const winners = contest.winners_revealed_at
+    ? await getWinners(contestId, categories || [])
+    : [];
 
   const contestUrl = `${getBaseUrl()}/c/${contest.id}`;
 
@@ -107,17 +114,24 @@ export default async function ContestDetailPage({
           submissions={(submissions as ContestSubmission[]) || []}
         />
 
-        {/* Contest Welcome Message Section */}
-        <ContestWelcomeMessage
-          initialWelcomeMessage={contest.welcome_message}
-          contestId={contestId}
-        />
+        {/* Winners Section - only show when winners are revealed */}
+        {contest.winners_revealed_at && <Winners winners={winners} />}
 
-        {/* Categories Section */}
-        <ContestCategories
-          contestId={contestId}
-          initialCategories={categories || []}
-        />
+        {/* Contest Welcome Message Section - hide when winners are revealed */}
+        {!contest.winners_revealed_at && (
+          <ContestWelcomeMessage
+            initialWelcomeMessage={contest.welcome_message}
+            contestId={contestId}
+          />
+        )}
+
+        {/* Categories Section - hide when winners are revealed */}
+        {!contest.winners_revealed_at && (
+          <ContestCategories
+            contestId={contestId}
+            initialCategories={categories || []}
+          />
+        )}
 
         {/* Review Submissions */}
         <Card id="review-submissions-card">

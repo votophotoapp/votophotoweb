@@ -13,6 +13,7 @@ interface GuestSubmissionItemProps {
   contestId: string;
   userVotes: Set<string>;
   votedCategories: Set<string>;
+  winnersRevealedAt: string | null;
 }
 
 export function GuestSubmissionItem({
@@ -23,6 +24,7 @@ export function GuestSubmissionItem({
   contestId,
   userVotes,
   votedCategories,
+  winnersRevealedAt,
 }: GuestSubmissionItemProps) {
   return (
     <Card className="overflow-hidden">
@@ -62,6 +64,7 @@ export function GuestSubmissionItem({
           contestId={contestId}
           userVotes={userVotes}
           votedCategories={votedCategories}
+          isVotingDisabled={winnersRevealedAt !== null}
         />
       </CardContent>
     </Card>

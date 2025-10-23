@@ -13,6 +13,7 @@ interface VotingButtonsProps {
   contestId: string;
   userVotes: Set<string>;
   votedCategories: Set<string>;
+  isVotingDisabled?: boolean;
 }
 
 export function VotingButtons({
@@ -22,6 +23,7 @@ export function VotingButtons({
   contestId,
   userVotes,
   votedCategories,
+  isVotingDisabled = false,
 }: VotingButtonsProps) {
   const [isVoting, setIsVoting] = useState(false);
 
@@ -71,13 +73,16 @@ export function VotingButtons({
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium">Vote for this submission:</p>
+      <p className="text-sm font-medium">
+        {isVotingDisabled ? "Voting is closed" : "Vote for this submission:"}
+      </p>
       <div className="flex flex-wrap gap-2">
         {categories.map((category) => {
           const hasVoted = userVotes.has(category.id);
           const categoryUsedElsewhere =
             votedCategories.has(category.id) && !hasVoted;
-          const isDisabled = isVoting || categoryUsedElsewhere;
+          const isDisabled =
+            isVoting || categoryUsedElsewhere || isVotingDisabled;
 
           return (
             <Button
@@ -89,7 +94,9 @@ export function VotingButtons({
               title={
                 categoryUsedElsewhere
                   ? "You have already voted for this category in another submission"
-                  : undefined
+                  : isVotingDisabled
+                    ? "Voting is closed as winners have been revealed"
+                    : undefined
               }
             >
               {hasVoted ? `✓ ${category.name}` : category.name}

@@ -31,17 +31,14 @@ export default function ContestCard({ contest }: ContestCardProps) {
             Created on {formatUtcToLocal(contest.created_at)}
             {contest.submissions_opened_at && (
               <div>
-                Started on {formatUtcToLocal(contest.submissions_opened_at)}
-              </div>
-            )}
-            {contest.submissions_closed_at && (
-              <div>
-                Ended on {formatUtcToLocal(contest.submissions_closed_at)}
+                Submissions opened on{" "}
+                {formatUtcToLocal(contest.submissions_opened_at)}
               </div>
             )}
             {contest.winners_revealed_at && (
               <div>
-                Votes counted on {formatUtcToLocal(contest.winners_revealed_at)}
+                Winners revealed on{" "}
+                {formatUtcToLocal(contest.winners_revealed_at)}
               </div>
             )}
           </CardDescription>

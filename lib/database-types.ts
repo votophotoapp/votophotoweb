@@ -41,6 +41,12 @@ export interface ContestSubmissionVote {
 
 // Extended types for components that include related data
 
+export interface ContestWithStats extends Contest {
+  submissionCount: number;
+  voteCount: number;
+  photos: string[]; // Array of image URLs, up to 4
+}
+
 export interface SubmissionWithCategories extends ContestSubmission {
   category_submission?: Array<{
     contest_category?: {

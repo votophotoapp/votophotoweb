@@ -5,16 +5,36 @@ import ContestCard from "@/components/contest/contest-card";
 
 export default async function Contests() {
   const supabase = await createClient();
+
+  // Get the current user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return (
+      <div className="container mx-auto py-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center py-12 w-full">
+          <p className="text-muted-foreground">
+            You must be logged in to view your contests.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const { data: contests } = await supabase
     .from("contest")
     .select()
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (!contests || contests.length === 0) {
     return (
       <div className="container mx-auto py-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8 w-full min-w-0">
-          <h1 className="text-3xl font-bold flex-shrink-0">Contests</h1>
+          <h1 className="text-3xl font-bold flex-shrink-0">My Contests</h1>
           <div className="flex-shrink-0 ml-4">
             <CreateContestDialog />
           </div>

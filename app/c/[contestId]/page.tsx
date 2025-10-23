@@ -83,31 +83,46 @@ export default async function ContestPage({ params }: ContestPageProps) {
             {contest.welcome_message}
           </p>
         )}
-        <SubmissionDisplay
-          contestId={contestId}
-          userSubmissions={userSubmissions}
-        />
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-2xl font-semibold">Browse Submissions</h2>
-            <p className="text-sm text-muted-foreground">
-              Vote for your favorites in each category!
-            </p>
+        {contest.submissions_opened_at === null && (
+          <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-8">
+            Submissions are not yet open. Check back soon to submit your photo.
           </div>
-          {allSubmissions.length > 0 ? (
-            <div className="space-y-4">
-              {allSubmissions.map((submission) => (
-                <GuestSubmissionItem
-                  key={submission.id}
-                  submission={submission}
-                  showTimestamp={true}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground">No submissions yet.</p>
+        )}
+        {contest.submissions_closed_at !== null && (
+          <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-8">
+            Submissions are now closed. Check back soon to see who won!
+          </div>
+        )}
+        {contest.submissions_opened_at !== null &&
+          contest.submissions_closed_at === null && (
+            <SubmissionDisplay
+              contestId={contestId}
+              userSubmissions={userSubmissions}
+            />
           )}
-        </div>
+        {contest.submissions_opened_at !== null && (
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-2xl font-semibold">Browse Submissions</h2>
+              <p className="text-sm text-muted-foreground">
+                Vote for your favorites in each category!
+              </p>
+            </div>
+            {allSubmissions.length > 0 ? (
+              <div className="space-y-4">
+                {allSubmissions.map((submission) => (
+                  <GuestSubmissionItem
+                    key={submission.id}
+                    submission={submission}
+                    showTimestamp={true}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground">No submissions yet.</p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

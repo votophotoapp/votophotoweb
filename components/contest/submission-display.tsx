@@ -13,13 +13,16 @@ export function SubmissionDisplay({
   userSubmissions,
 }: SubmissionDisplayProps) {
   return (
-    <div className="bg-muted/50 rounded-lg p-6 mb-8">
+    <div>
       {userSubmissions.length > 0 ? (
         <>
-          <h2 className="text-2xl font-semibold mb-4">
-            Your Submission{userSubmissions.length > 1 ? "s" : ""}
-          </h2>
-          <div className="space-y-6">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold">Your Submissions</h2>
+            <p className="text-sm text-muted-foreground">
+              Here are the photos you&apos;ve submitted to this contest.
+            </p>
+          </div>
+          <div className="flex flex-col space-y-3">
             {userSubmissions.map((submission) => (
               <UserSubmissionItem
                 key={submission.id}
@@ -30,11 +33,6 @@ export function SubmissionDisplay({
                 titleSize="xl"
               />
             ))}
-          </div>
-          <div className="mt-6 pt-6 border-t">
-            <p className="text-muted-foreground mb-4">
-              Want to submit another photo?
-            </p>
             <Link href={`/c/${contestId}/submit`}>
               <Button>Add Another Photo</Button>
             </Link>
@@ -42,10 +40,13 @@ export function SubmissionDisplay({
         </>
       ) : (
         <>
-          <h2 className="text-2xl font-semibold mb-2">Welcome!</h2>
-          <p className="text-muted-foreground mb-4">
-            Ready to upload your photo for the contest?
-          </p>
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold">Your Submissions</h2>
+            <p className="text-sm text-muted-foreground">
+              You haven&apos;t submitted any photos yet. Ready to upload your
+              first photo?
+            </p>
+          </div>
           <div>
             <Link href={`/c/${contestId}/submit`}>
               <Button>Add Your Photo</Button>

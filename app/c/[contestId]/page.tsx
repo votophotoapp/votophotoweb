@@ -1,9 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { SubmissionDisplay } from "@/components/contest/submission-display";
-import { ContestSubmission, Contest } from "@/lib/database-types";
+import {
+  ContestSubmission,
+  Contest,
+  ContestCategory,
+} from "@/lib/database-types";
 import { Metadata } from "next";
 import { GuestSubmissionItem } from "@/components/contest/guest-submission-item";
+import { YourVotes } from "@/components/contest/your-votes";
 
 interface ContestPageProps {
   params: Promise<{
@@ -44,6 +49,18 @@ export default async function ContestPage({ params }: ContestPageProps) {
 
   const contest: Contest = data;
 
+  // Fetch categories for the contest
+  const { data: categoriesData } = await supabase
+    .from("contest_category")
+    .select("*")
+    .eq("contest_id", contestId)
+    .order("sort_order", { ascending: true });
+
+  let categories: ContestCategory[] = [];
+  if (categoriesData) {
+    categories = categoriesData as ContestCategory[];
+  }
+
   // Fetch all submissions for the contest
   const { data: submissionsData } = await supabase
     .from("contest_submission")
@@ -74,25 +91,54 @@ export default async function ContestPage({ params }: ContestPageProps) {
     }
   }
 
+  // Fetch user's votes for all submissions if authenticated
+  const userVotes: Record<string, Set<string>> = {};
+  const votedCategories: Set<string> = new Set();
+  if (user) {
+    const { data: votesData } = await supabase
+      .from("contest_submission_vote")
+      .select("contest_submission_id, contest_category_id")
+      .eq("user_id", user.id)
+      .in(
+        "contest_submission_id",
+        allSubmissions.map((s) => s.id),
+      );
+
+    if (votesData) {
+      votesData.forEach((vote) => {
+        if (!userVotes[vote.contest_submission_id]) {
+          userVotes[vote.contest_submission_id] = new Set();
+        }
+        userVotes[vote.contest_submission_id].add(vote.contest_category_id);
+        votedCategories.add(vote.contest_category_id);
+      });
+    }
+  }
+
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold mb-4">{contest.title}</h1>
-        {contest.welcome_message && (
-          <p className="text-lg text-muted-foreground mb-8">
-            {contest.welcome_message}
-          </p>
-        )}
+      <div className="max-w-5xl mx-auto space-y-8">
+        <div>
+          <h1 className="text-4xl font-bold mb-4">{contest.title}</h1>
+          {contest.welcome_message && (
+            <p className="text-lg text-muted-foreground">
+              {contest.welcome_message}
+            </p>
+          )}
+        </div>
+
         {contest.submissions_opened_at === null && (
-          <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-8">
+          <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
             Submissions are not yet open. Check back soon to submit your photo.
           </div>
         )}
+
         {contest.submissions_closed_at !== null && (
-          <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-8">
+          <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
             Submissions are now closed. Check back soon to see who won!
           </div>
         )}
+
         {contest.submissions_opened_at !== null &&
           contest.submissions_closed_at === null && (
             <SubmissionDisplay
@@ -100,10 +146,20 @@ export default async function ContestPage({ params }: ContestPageProps) {
               userSubmissions={userSubmissions}
             />
           )}
+
+        {user && contest.submissions_opened_at !== null && (
+          <YourVotes
+            categories={categories}
+            userVotes={userVotes}
+            votedCategories={votedCategories}
+            allSubmissions={allSubmissions}
+          />
+        )}
+
         {contest.submissions_opened_at !== null && (
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-2xl font-semibold">Browse Submissions</h2>
+          <div>
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold">Browse Submissions</h2>
               <p className="text-sm text-muted-foreground">
                 Vote for your favorites in each category!
               </p>
@@ -115,6 +171,11 @@ export default async function ContestPage({ params }: ContestPageProps) {
                     key={submission.id}
                     submission={submission}
                     showTimestamp={true}
+                    categories={categories}
+                    user={user}
+                    contestId={contestId}
+                    userVotes={userVotes[submission.id] || new Set()}
+                    votedCategories={votedCategories}
                   />
                 ))}
               </div>

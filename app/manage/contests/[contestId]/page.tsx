@@ -59,6 +59,29 @@ export default async function ContestDetailPage({
     .eq("contest_id", contestId)
     .order("created_at", { ascending: false });
 
+  // Fetch vote count - get votes for all submissions in this contest
+  const { count: votesCount } = await supabase
+    .from("contest_submission_vote")
+    .select("*", { count: "exact", head: true })
+    .in("contest_submission_id", submissions?.map((s) => s.id) || []);
+
+  // Fetch unique guests who submitted photos
+  const { data: submittersData } = await supabase
+    .from("contest_submission")
+    .select("user_id")
+    .eq("contest_id", contestId);
+  const guestsSubmittedCount = new Set(
+    submittersData?.map((s) => s.user_id) || [],
+  ).size;
+
+  // Fetch unique guests who voted
+  const { data: votersData } = await supabase
+    .from("contest_submission_vote")
+    .select("user_id")
+    .in("contest_submission_id", submissions?.map((s) => s.id) || []);
+  const guestsVotedCount = new Set(votersData?.map((v) => v.user_id) || [])
+    .size;
+
   const contestUrl = `${getBaseUrl()}/c/${contest.id}`;
 
   return (
@@ -70,7 +93,9 @@ export default async function ContestDetailPage({
         {/* Stats Cards */}
         <ContestStats
           submissionsCount={submissions?.length || 0}
-          guestsVotedCount={0}
+          votesReceivedCount={votesCount || 0}
+          guestsSubmittedCount={guestsSubmittedCount || 0}
+          guestsVotedCount={guestsVotedCount || 0}
         />
 
         {/* Contest Guide */}

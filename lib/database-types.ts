@@ -32,10 +32,11 @@ export interface ContestSubmission {
   image_url: string;
 }
 
-export interface CategorySubmission {
-  contest_category_id: string;
+export interface ContestSubmissionVote {
+  user_id: string;
   contest_submission_id: string;
   created_at: string;
+  contest_category_id: string;
 }
 
 // Extended types for components that include related data

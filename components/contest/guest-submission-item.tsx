@@ -1,16 +1,28 @@
 import { formatUtcToLocal } from "@/lib/utils";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ContestSubmission } from "@/lib/database-types";
+import { ContestSubmission, ContestCategory } from "@/lib/database-types";
+import { User } from "@supabase/supabase-js";
+import { VotingButtons } from "./voting-buttons";
 
 interface GuestSubmissionItemProps {
   submission: ContestSubmission;
   showTimestamp?: boolean;
+  categories: ContestCategory[];
+  user: User | null;
+  contestId: string;
+  userVotes: Set<string>;
+  votedCategories: Set<string>;
 }
 
 export function GuestSubmissionItem({
   submission,
   showTimestamp = true,
+  categories,
+  user,
+  contestId,
+  userVotes,
+  votedCategories,
 }: GuestSubmissionItemProps) {
   return (
     <Card className="overflow-hidden">
@@ -43,7 +55,14 @@ export function GuestSubmissionItem({
             {submission.description}
           </p>
         )}
-        {/* Future: Add voting buttons here */}
+        <VotingButtons
+          submissionId={submission.id}
+          categories={categories}
+          user={user}
+          contestId={contestId}
+          userVotes={userVotes}
+          votedCategories={votedCategories}
+        />
       </CardContent>
     </Card>
   );

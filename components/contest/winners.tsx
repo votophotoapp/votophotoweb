@@ -38,7 +38,7 @@ export function Winners({ winners }: WinnersProps) {
       acc[winner.categoryName].push(winner);
       return acc;
     },
-    {} as Record<string, Winner[]>
+    {} as Record<string, Winner[]>,
   );
 
   return (
@@ -127,7 +127,7 @@ export function Winners({ winners }: WinnersProps) {
                 ))}
               </CardContent>
             </Card>
-          )
+          ),
         )}
       </div>
     </div>

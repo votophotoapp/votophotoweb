@@ -74,7 +74,7 @@ export default async function ContestDetailPage({
     .select("user_id")
     .eq("contest_id", contestId);
   const guestsSubmittedCount = new Set(
-    submittersData?.map((s) => s.user_id) || [],
+    submittersData?.map((s) => s.user_id) || []
   ).size;
 
   // Fetch unique guests who voted
@@ -99,13 +99,15 @@ export default async function ContestDetailPage({
         {/* Contest Title Section */}
         <ContestTitle initialTitle={contest.title} contestId={contestId} />
 
-        {/* Stats Cards */}
-        <ContestStats
-          submissionsCount={submissions?.length || 0}
-          votesReceivedCount={votesCount || 0}
-          guestsSubmittedCount={guestsSubmittedCount || 0}
-          guestsVotedCount={guestsVotedCount || 0}
-        />
+        {/* Stats Cards - only show when submissions are opened */}
+        {contest.submissions_opened_at && (
+          <ContestStats
+            submissionsCount={submissions?.length || 0}
+            votesReceivedCount={votesCount || 0}
+            guestsSubmittedCount={guestsSubmittedCount || 0}
+            guestsVotedCount={guestsVotedCount || 0}
+          />
+        )}
 
         {/* Contest Guide */}
         <ContestGuide

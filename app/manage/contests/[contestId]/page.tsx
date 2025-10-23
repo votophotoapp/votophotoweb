@@ -12,6 +12,7 @@ import { Winners } from "@/components/contest/winners";
 import { getBaseUrl } from "@/lib/utils";
 import { ContestSubmission } from "@/lib/database-types";
 import { getWinners } from "@/components/contest/winners-utils";
+import { ContestRealtimeListener } from "@/components/contest/contest-realtime-listener";
 
 interface ContestDetailPageProps {
   params: Promise<{
@@ -93,6 +94,7 @@ export default async function ContestDetailPage({
 
   return (
     <div className="container mx-auto py-4">
+      <ContestRealtimeListener contestId={contestId} />
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Contest Title Section */}
         <ContestTitle initialTitle={contest.title} contestId={contestId} />

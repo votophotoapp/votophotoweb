@@ -11,6 +11,7 @@ import { GuestSubmissionItem } from "@/components/contest/guest-submission-item"
 import { YourVotes } from "@/components/contest/your-votes";
 import { Winners } from "@/components/contest/winners";
 import { getWinners, Winner } from "@/components/contest/winners-utils";
+import { ContestRealtimeListener } from "@/components/contest/contest-realtime-listener";
 
 interface ContestPageProps {
   params: Promise<{
@@ -68,7 +69,7 @@ export default async function ContestPage({ params }: ContestPageProps) {
     .from("contest_submission")
     .select("*")
     .eq("contest_id", contestId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: true });
 
   let allSubmissions: ContestSubmission[] = [];
   if (submissionsData) {
@@ -125,6 +126,7 @@ export default async function ContestPage({ params }: ContestPageProps) {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      <ContestRealtimeListener contestId={contestId} />
       <div className="max-w-5xl mx-auto space-y-8">
         <div>
           <h1 className="text-4xl font-bold mb-4">{contest.title}</h1>
@@ -135,27 +137,21 @@ export default async function ContestPage({ params }: ContestPageProps) {
           )}
         </div>
 
+        {contest.winners_revealed_at !== null && <Winners winners={winners} />}
+
         {contest.submissions_opened_at === null && (
           <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
             Submissions are not yet open. Check back soon to submit your photo.
           </div>
         )}
 
-        {contest.submissions_closed_at !== null && (
-          <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
-            Submissions are now closed. Check back soon to see who won!
-          </div>
+        {contest.submissions_opened_at !== null && (
+          <SubmissionDisplay
+            contestId={contestId}
+            userSubmissions={userSubmissions}
+            submissionsClosed={contest.submissions_closed_at !== null}
+          />
         )}
-
-        {contest.submissions_opened_at !== null &&
-          contest.submissions_closed_at === null && (
-            <SubmissionDisplay
-              contestId={contestId}
-              userSubmissions={userSubmissions}
-            />
-          )}
-
-        {contest.winners_revealed_at !== null && <Winners winners={winners} />}
 
         {user && contest.submissions_opened_at !== null && (
           <YourVotes

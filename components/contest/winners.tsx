@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Trophy } from "lucide-react";
+import { Trophy, PartyPopper } from "lucide-react";
 
 interface WinnersProps {
   winners: Winner[];
@@ -19,7 +19,10 @@ export function Winners({ winners }: WinnersProps) {
     return (
       <div className="space-y-3">
         <div>
-          <h2 className="text-xl font-semibold">Winners</h2>
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <PartyPopper className="w-5 h-5 text-yellow-500" />
+            Winners
+          </h2>
           <p className="text-sm text-muted-foreground">No winners yet.</p>
         </div>
       </div>
@@ -41,7 +44,10 @@ export function Winners({ winners }: WinnersProps) {
   return (
     <div className="space-y-3">
       <div>
-        <h2 className="text-xl font-semibold">Winners</h2>
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          <Trophy className="w-5 h-5 text-yellow-500" />
+          Winners
+        </h2>
         <p className="text-sm text-muted-foreground">
           Congratulations to the winners in each category!
         </p>

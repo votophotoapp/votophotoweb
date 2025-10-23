@@ -6,11 +6,13 @@ import { ContestSubmission } from "@/lib/database-types";
 interface SubmissionDisplayProps {
   contestId: string;
   userSubmissions: ContestSubmission[];
+  submissionsClosed: boolean;
 }
 
 export function SubmissionDisplay({
   contestId,
   userSubmissions,
+  submissionsClosed,
 }: SubmissionDisplayProps) {
   return (
     <div>
@@ -33,9 +35,11 @@ export function SubmissionDisplay({
                 titleSize="xl"
               />
             ))}
-            <Link href={`/c/${contestId}/submit`}>
-              <Button>Add Another Photo</Button>
-            </Link>
+            {!submissionsClosed && (
+              <Link href={`/c/${contestId}/submit`}>
+                <Button>Add Another Photo</Button>
+              </Link>
+            )}
           </div>
         </>
       ) : (
@@ -48,9 +52,11 @@ export function SubmissionDisplay({
             </p>
           </div>
           <div>
-            <Link href={`/c/${contestId}/submit`}>
-              <Button>Add Your Photo</Button>
-            </Link>
+            {!submissionsClosed && (
+              <Link href={`/c/${contestId}/submit`}>
+                <Button>Add Your Photo</Button>
+              </Link>
+            )}
           </div>
         </>
       )}

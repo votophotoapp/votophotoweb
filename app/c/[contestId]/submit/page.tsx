@@ -37,15 +37,50 @@ export default async function SubmitPhotoPage({
   const { contestId } = await params;
   const supabase = await createClient();
 
-  // Verify contest exists
+  // Verify contest exists and check submission status
   const { data: contest, error: contestError } = await supabase
     .from("contest")
-    .select("id")
+    .select("id, submissions_opened_at, submissions_closed_at")
     .eq("id", contestId)
     .single();
 
   if (contestError || !contest) {
     notFound();
+  }
+
+  // Check if submissions are closed
+  if (contest.submissions_closed_at !== null) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <div className="max-w-2xl mx-auto text-center">
+          <h1 className="text-3xl font-bold mb-4">Submissions Closed</h1>
+          <p className="text-muted-foreground mb-6">
+            Submissions for this contest are now closed. Check back soon to see
+            the winners!
+          </p>
+          <Link href={`/c/${contestId}`}>
+            <Button>Back to Contest</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if submissions are not yet open
+  if (contest.submissions_opened_at === null) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <div className="max-w-2xl mx-auto text-center">
+          <h1 className="text-3xl font-bold mb-4">Submissions Not Open</h1>
+          <p className="text-muted-foreground mb-6">
+            Submissions for this contest are not yet open. Check back soon!
+          </p>
+          <Link href={`/c/${contestId}`}>
+            <Button>Back to Contest</Button>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -305,10 +305,13 @@ export async function revealWinners(formData: FormData) {
     throw new Error("Contest ID is required");
   }
 
-  // Update the contest to set winners_revealed_at to now, but only if the user owns it
+  // Update the contest to set winners_revealed_at and submissions_closed_at to now, but only if the user owns it
   const { data, error } = await supabase
     .from("contest")
-    .update({ winners_revealed_at: new Date().toISOString() })
+    .update({
+      winners_revealed_at: new Date().toISOString(),
+      submissions_closed_at: new Date().toISOString(),
+    })
     .eq("id", contestId)
     .eq("user_id", user.id) // Ensure user can only update their own contests
     .select();
@@ -346,10 +349,13 @@ export async function hideWinners(formData: FormData) {
     throw new Error("Contest ID is required");
   }
 
-  // Update the contest to set winners_revealed_at to null, but only if the user owns it
+  // Update the contest to set winners_revealed_at and submissions_closed_at to null, but only if the user owns it
   const { data, error } = await supabase
     .from("contest")
-    .update({ winners_revealed_at: null })
+    .update({
+      winners_revealed_at: null,
+      submissions_closed_at: null,
+    })
     .eq("id", contestId)
     .eq("user_id", user.id) // Ensure user can only update their own contests
     .select();

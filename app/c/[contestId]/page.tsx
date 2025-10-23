@@ -13,6 +13,8 @@ import { Winners } from "@/components/contest/winners";
 import { getWinners, Winner } from "@/components/contest/winners-utils";
 import { ContestRealtimeListener } from "@/components/contest/contest-realtime-listener";
 
+export const dynamic = "force-dynamic";
+
 interface ContestPageProps {
   params: Promise<{
     contestId: string;
@@ -104,7 +106,7 @@ export default async function ContestPage({ params }: ContestPageProps) {
       .eq("user_id", user.id)
       .in(
         "contest_submission_id",
-        allSubmissions.map((s) => s.id),
+        allSubmissions.map((s) => s.id)
       );
 
     if (votesData) {

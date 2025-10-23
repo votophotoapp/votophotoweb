@@ -14,6 +14,8 @@ import { ContestSubmission } from "@/lib/database-types";
 import { getWinners } from "@/components/contest/winners-utils";
 import { ContestRealtimeListener } from "@/components/contest/contest-realtime-listener";
 
+export const dynamic = "force-dynamic";
+
 interface ContestDetailPageProps {
   params: Promise<{
     contestId: string;

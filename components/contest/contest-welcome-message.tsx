@@ -17,10 +17,10 @@ export function ContestWelcomeMessage({
 }: ContestWelcomeMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [welcomeMessage, setWelcomeMessage] = useState(
-    initialWelcomeMessage || ""
+    initialWelcomeMessage || "",
   );
   const [tempWelcomeMessage, setTempWelcomeMessage] = useState(
-    initialWelcomeMessage || ""
+    initialWelcomeMessage || "",
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +43,7 @@ export function ContestWelcomeMessage({
     try {
       const result = await updateContestWelcomeMessage(
         contestId,
-        tempWelcomeMessage.trim()
+        tempWelcomeMessage.trim(),
       );
       if (result.success) {
         setWelcomeMessage(tempWelcomeMessage.trim());
@@ -51,7 +51,7 @@ export function ContestWelcomeMessage({
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to update welcome message"
+        err instanceof Error ? err.message : "Failed to update welcome message",
       );
     } finally {
       setIsLoading(false);

@@ -7,9 +7,9 @@ export interface Contest {
   title?: string;
   welcome_message?: string;
   user_id: string;
-  votes_counted_at: string | null;
-  contest_started_at: string | null;
-  contest_ended_at: string | null;
+  winners_revealed_at: string | null;
+  submissions_opened_at: string | null;
+  submissions_closed_at: string | null;
 }
 
 export interface ContestCategory {

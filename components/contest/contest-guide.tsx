@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Contest, Category, ContestSubmission } from "@/lib/database-types";
 import {
-  startContest,
-  endContest,
-  unstartContest,
-  countVotes,
-  uncountVotes,
-  unendContest,
+  openSubmissions,
+  closeSubmissions,
+  uncloseSubmissions,
+  revealWinners,
+  hideWinners,
 } from "@/app/manage/contests/actions";
 import { formatUtcToLocal } from "@/lib/utils";
 import {
@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import QRCode from "qrcode";
 
-interface ContestStatusProps {
+interface ContestGuideProps {
   contest: Contest;
   contestId: string;
   contestUrl: string;
@@ -34,13 +34,13 @@ interface ContestStatusProps {
   submissions?: ContestSubmission[];
 }
 
-export function ContestStatus({
+export function ContestGuide({
   contest,
   contestId,
   categories = [],
   contestUrl,
   submissions = [],
-}: ContestStatusProps) {
+}: ContestGuideProps) {
   const [copied, setCopied] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
@@ -135,7 +135,9 @@ export function ContestStatus({
   return (
     <Card className="border-positive">
       <CardHeader>
-        <CardTitle className="text-positive">Step-By-Step Guide</CardTitle>
+        <CardTitle className="text-positive">
+          Contest Step-By-Step Guide
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -220,7 +222,7 @@ export function ContestStatus({
           </div>
 
           <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border-2 bg-indigo-100 text-indigo-800 border-indigo-300">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border-2 bg-green-100 text-green-800 border-green-300">
               <QrCode className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">
@@ -276,14 +278,14 @@ export function ContestStatus({
           <div className="flex items-start space-x-3">
             <div
               className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                contest.contest_started_at
+                contest.submissions_opened_at
                   ? "bg-green-100 text-green-800 border-green-300"
                   : categories.length > 0
                     ? "bg-blue-100 text-blue-800 border-blue-300"
                     : "bg-gray-100 text-gray-500 border-gray-300"
               }`}
             >
-              {contest.contest_started_at ? (
+              {contest.submissions_opened_at ? (
                 <CheckCircle className="w-4 h-4" />
               ) : categories.length > 0 ? (
                 <Play className="w-4 h-4" />
@@ -292,46 +294,86 @@ export function ContestStatus({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-gray-900">
-                Start Contest
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-medium text-gray-900">
+                  Open Submissions
+                </div>
+                <Badge
+                  className={
+                    contest.submissions_opened_at &&
+                    !contest.submissions_closed_at
+                      ? "bg-green-100 text-green-800 hover:bg-green-200"
+                      : ""
+                  }
+                  variant={
+                    contest.submissions_opened_at &&
+                    !contest.submissions_closed_at
+                      ? "default"
+                      : "secondary"
+                  }
+                >
+                  {contest.submissions_opened_at &&
+                  !contest.submissions_closed_at
+                    ? "Open"
+                    : "Closed"}
+                </Badge>
               </div>
               <div className="text-sm text-gray-600 mt-1">
-                {contest.contest_started_at
-                  ? `Started ${formatUtcToLocal(contest.contest_started_at)}`
+                {contest.submissions_opened_at
+                  ? `Opened ${formatUtcToLocal(contest.submissions_opened_at)}`
                   : categories.length > 0
                     ? "Begin accepting photo submissions"
                     : "Available after adding categories"}
+                {contest.submissions_closed_at && (
+                  <div className="mt-1">
+                    Closed {formatUtcToLocal(contest.submissions_closed_at)}
+                  </div>
+                )}
               </div>
-              {contest.contest_started_at && submissions.length > 0 && (
+              {contest.submissions_opened_at && submissions.length > 0 && (
                 <div className="text-sm text-gray-600 mt-1">
                   {submissions.length} submission
                   {submissions.length === 1 ? "" : "s"} received
                 </div>
               )}
-              {categories.length > 0 && (
+              {categories.length > 0 && !contest.winners_revealed_at && (
                 <div className="mt-2 flex gap-2">
-                  {contest.contest_started_at && submissions.length > 0 && (
-                    <Button size="sm" onClick={scrollToReviewSubmissions}>
+                  {contest.submissions_opened_at && submissions.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={scrollToReviewSubmissions}
+                    >
                       Review {submissions.length} Submission
                       {submissions.length === 1 ? "" : "s"}
                     </Button>
                   )}
                   <form
                     action={
-                      contest.contest_started_at ? unstartContest : startContest
+                      contest.submissions_closed_at
+                        ? uncloseSubmissions
+                        : contest.submissions_opened_at
+                          ? closeSubmissions
+                          : openSubmissions
                     }
                   >
                     <input type="hidden" name="contestId" value={contestId} />
                     <Button
                       type="submit"
                       variant={
-                        contest.contest_started_at ? "outline" : "default"
+                        contest.submissions_closed_at
+                          ? "outline"
+                          : contest.submissions_opened_at
+                            ? "outline"
+                            : "default"
                       }
                       size="sm"
                     >
-                      {contest.contest_started_at
-                        ? "Unstart Contest"
-                        : "Start Contest"}
+                      {contest.submissions_closed_at
+                        ? "Reopen Submissions"
+                        : contest.submissions_opened_at
+                          ? "Close Submissions"
+                          : "Open Submissions"}
                     </Button>
                   </form>
                 </div>
@@ -342,16 +384,16 @@ export function ContestStatus({
           <div className="flex items-start space-x-3">
             <div
               className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                contest.votes_counted_at
+                contest.winners_revealed_at
                   ? "bg-green-100 text-green-800 border-green-300"
-                  : contest.contest_started_at
+                  : contest.submissions_opened_at
                     ? "bg-orange-100 text-orange-800 border-orange-300"
                     : "bg-gray-100 text-gray-500 border-gray-300"
               }`}
             >
-              {contest.votes_counted_at ? (
+              {contest.winners_revealed_at ? (
                 <CheckCircle className="w-4 h-4" />
-              ) : contest.contest_started_at ? (
+              ) : contest.submissions_opened_at ? (
                 <Play className="w-4 h-4" />
               ) : (
                 <Circle className="w-4 h-4" />
@@ -359,78 +401,34 @@ export function ContestStatus({
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-gray-900">
-                Count Votes
+                Reveal Winners
               </div>
               <div className="text-sm text-gray-600 mt-1">
-                {contest.votes_counted_at
-                  ? `Votes counted ${formatUtcToLocal(contest.votes_counted_at)}`
-                  : contest.contest_started_at
-                    ? "Tally all votes and prepare winners"
-                    : "Available after contest starts"}
+                {contest.winners_revealed_at
+                  ? `Winners revealed ${formatUtcToLocal(contest.winners_revealed_at)}`
+                  : contest.submissions_opened_at
+                    ? "Tally all votes and reveal winners"
+                    : "Available after submissions are opened"}
               </div>
-              {contest.contest_started_at && (
+              {contest.submissions_opened_at && (
                 <form
-                  action={contest.votes_counted_at ? uncountVotes : countVotes}
+                  action={
+                    contest.winners_revealed_at ? hideWinners : revealWinners
+                  }
                   className="mt-2"
                 >
                   <input type="hidden" name="contestId" value={contestId} />
                   <Button
                     type="submit"
-                    variant={contest.votes_counted_at ? "outline" : "default"}
-                    size="sm"
-                    disabled={!contest.contest_started_at}
-                  >
-                    {contest.votes_counted_at ? "Uncount Votes" : "Count Votes"}
-                  </Button>
-                </form>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <div
-              className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                contest.contest_ended_at
-                  ? "bg-green-100 text-green-800 border-green-300"
-                  : contest.contest_started_at && contest.votes_counted_at
-                    ? "bg-purple-100 text-purple-800 border-purple-300"
-                    : "bg-gray-100 text-gray-500 border-gray-300"
-              }`}
-            >
-              {contest.contest_ended_at ? (
-                <CheckCircle className="w-4 h-4" />
-              ) : contest.contest_started_at && contest.votes_counted_at ? (
-                <Play className="w-4 h-4" />
-              ) : (
-                <Circle className="w-4 h-4" />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-gray-900">
-                End Contest
-              </div>
-              <div className="text-sm text-gray-600 mt-1">
-                {contest.contest_ended_at
-                  ? `Contest ended ${formatUtcToLocal(contest.contest_ended_at)}`
-                  : contest.contest_started_at && contest.votes_counted_at
-                    ? "Finalize contest and reveal winners"
-                    : "Available after votes are counted"}
-              </div>
-              {contest.contest_started_at && contest.votes_counted_at && (
-                <form
-                  action={contest.contest_ended_at ? unendContest : endContest}
-                  className="mt-2"
-                >
-                  <input type="hidden" name="contestId" value={contestId} />
-                  <Button
-                    type="submit"
-                    variant={contest.contest_ended_at ? "outline" : "default"}
-                    size="sm"
-                    disabled={
-                      !contest.contest_started_at || !contest.votes_counted_at
+                    variant={
+                      contest.winners_revealed_at ? "outline" : "default"
                     }
+                    size="sm"
+                    disabled={!contest.submissions_opened_at}
                   >
-                    {contest.contest_ended_at ? "Unend Contest" : "End Contest"}
+                    {contest.winners_revealed_at
+                      ? "Hide Winners and Reopen Submissions"
+                      : "Reveal Winners"}
                   </Button>
                 </form>
               )}
@@ -438,7 +436,20 @@ export function ContestStatus({
           </div>
         </div>
 
-        {/* QR Code Modal */}
+        {/* Success Banner */}
+        {contest.winners_revealed_at && (
+          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center">
+              <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+              <div className="text-sm font-medium text-green-800">
+                Contest Complete!
+              </div>
+            </div>
+            <div className="text-sm text-green-700 mt-1">
+              Winners have been revealed and the contest is now finished.
+            </div>
+          </div>
+        )}
         {showQrCode && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">

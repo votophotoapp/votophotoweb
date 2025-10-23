@@ -6,7 +6,7 @@ import { ContestWelcomeMessage } from "@/components/contest/contest-welcome-mess
 import { ContestCategories } from "@/components/contest/contest-categories";
 import { ContestStats } from "@/components/contest/contest-stats";
 import { DeleteContestDialog } from "@/components/contest/delete-contest-dialog";
-import { ContestStatus } from "@/components/contest/contest-status";
+import { ContestGuide } from "@/components/contest/contest-guide";
 import { ReviewSubmissions } from "@/components/contest/review-submissions";
 import { getBaseUrl } from "@/lib/utils";
 import { ContestSubmission } from "@/lib/database-types";
@@ -73,8 +73,8 @@ export default async function ContestDetailPage({
           guestsVotedCount={0}
         />
 
-        {/* Contest Status */}
-        <ContestStatus
+        {/* Contest Guide */}
+        <ContestGuide
           contest={contest}
           contestId={contestId}
           contestUrl={contestUrl}

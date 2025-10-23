@@ -160,7 +160,7 @@ export async function deleteContest(contestId: string) {
   return { success: true };
 }
 
-export async function startContest(formData: FormData) {
+export async function openSubmissions(formData: FormData) {
   const supabase = await createClient();
 
   // Get the current user
@@ -179,189 +179,153 @@ export async function startContest(formData: FormData) {
     throw new Error("Contest ID is required");
   }
 
-  // Update the contest to set contest_started_at to now, but only if the user owns it
-  const { data, error } = await supabase
-    .from("contest")
-    .update({ contest_started_at: new Date().toISOString() })
-    .eq("id", contestId)
-    .eq("user_id", user.id) // Ensure user can only update their own contests
-    .select();
-
-  if (error) {
-    throw new Error("Failed to start contest: " + error.message);
-  }
-
-  if (!data || data.length === 0) {
-    throw new Error(
-      "Contest not found or you don't have permission to start it",
-    );
-  }
-
-  // Revalidate the contest page to show the updated end date
-  revalidatePath(`/manage/contests/${contestId}`);
-}
-
-export async function unendContest(formData: FormData) {
-  const supabase = await createClient();
-
-  // Get the current user
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    throw new Error("User not authenticated");
-  }
-
-  const contestId = formData.get("contestId") as string;
-
-  if (!contestId) {
-    throw new Error("Contest ID is required");
-  }
-
-  // Update the contest to set contest_ended_at to null, but only if the user owns it
-  const { data, error } = await supabase
-    .from("contest")
-    .update({ contest_ended_at: null })
-    .eq("id", contestId)
-    .eq("user_id", user.id) // Ensure user can only update their own contests
-    .select();
-
-  if (error) {
-    throw new Error("Failed to unend contest: " + error.message);
-  }
-
-  if (!data || data.length === 0) {
-    throw new Error(
-      "Contest not found or you don't have permission to unend it",
-    );
-  }
-
-  // Revalidate the contest page to show the updated end date
-  revalidatePath(`/manage/contests/${contestId}`);
-}
-
-export async function countVotes(formData: FormData) {
-  const supabase = await createClient();
-
-  // Get the current user
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    throw new Error("User not authenticated");
-  }
-
-  const contestId = formData.get("contestId") as string;
-
-  if (!contestId) {
-    throw new Error("Contest ID is required");
-  }
-
-  // Update the contest to set votes_counted_at to now, but only if the user owns it
-  const { data, error } = await supabase
-    .from("contest")
-    .update({ votes_counted_at: new Date().toISOString() })
-    .eq("id", contestId)
-    .eq("user_id", user.id) // Ensure user can only update their own contests
-    .select();
-
-  if (error) {
-    throw new Error("Failed to count votes: " + error.message);
-  }
-
-  if (!data || data.length === 0) {
-    throw new Error(
-      "Contest not found or you don't have permission to count votes",
-    );
-  }
-
-  // Revalidate the contest page to show the updated count date
-  revalidatePath(`/manage/contests/${contestId}`);
-}
-
-export async function uncountVotes(formData: FormData) {
-  const supabase = await createClient();
-
-  // Get the current user
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    throw new Error("User not authenticated");
-  }
-
-  const contestId = formData.get("contestId") as string;
-
-  if (!contestId) {
-    throw new Error("Contest ID is required");
-  }
-
-  // Update the contest to set votes_counted_at to null, but only if the user owns it
-  const { data, error } = await supabase
-    .from("contest")
-    .update({ votes_counted_at: null })
-    .eq("id", contestId)
-    .eq("user_id", user.id) // Ensure user can only update their own contests
-    .select();
-
-  if (error) {
-    throw new Error("Failed to uncount votes: " + error.message);
-  }
-
-  if (!data || data.length === 0) {
-    throw new Error(
-      "Contest not found or you don't have permission to uncount votes",
-    );
-  }
-
-  // Revalidate the contest page to show the updated count date
-  revalidatePath(`/manage/contests/${contestId}`);
-}
-
-export async function unstartContest(formData: FormData) {
-  const supabase = await createClient();
-
-  // Get the current user
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    throw new Error("User not authenticated");
-  }
-
-  const contestId = formData.get("contestId") as string;
-
-  if (!contestId) {
-    throw new Error("Contest ID is required");
-  }
-
-  // Update the contest to set contest_started_at to null, but only if the user owns it
+  // Update the contest to set submissions_opened_at to now, but only if the user owns it
   const { data, error } = await supabase
     .from("contest")
     .update({
-      contest_started_at: null,
-      votes_counted_at: null,
-      contest_ended_at: null,
+      submissions_opened_at: new Date().toISOString(),
+      submissions_closed_at: null,
     })
     .eq("id", contestId)
     .eq("user_id", user.id) // Ensure user can only update their own contests
     .select();
 
   if (error) {
-    throw new Error("Failed to unstart contest: " + error.message);
+    throw new Error("Failed to open submissions: " + error.message);
   }
 
   if (!data || data.length === 0) {
     throw new Error(
-      "Contest not found or you don't have permission to unstart it",
+      "Contest not found or you don't have permission to open submissions",
+    );
+  }
+
+  // Revalidate the contest page to show the updated end date
+  revalidatePath(`/manage/contests/${contestId}`);
+}
+
+export async function revealWinners(formData: FormData) {
+  const supabase = await createClient();
+
+  // Get the current user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("User not authenticated");
+  }
+
+  const contestId = formData.get("contestId") as string;
+
+  if (!contestId) {
+    throw new Error("Contest ID is required");
+  }
+
+  // Update the contest to set winners_revealed_at to now and close submissions, but only if the user owns it
+  const { data, error } = await supabase
+    .from("contest")
+    .update({
+      winners_revealed_at: new Date().toISOString(),
+      submissions_closed_at: new Date().toISOString(),
+    })
+    .eq("id", contestId)
+    .eq("user_id", user.id) // Ensure user can only update their own contests
+    .select();
+
+  if (error) {
+    throw new Error("Failed to reveal winners: " + error.message);
+  }
+
+  if (!data || data.length === 0) {
+    throw new Error(
+      "Contest not found or you don't have permission to reveal winners",
+    );
+  }
+
+  // Revalidate the contest page to show the updated count date
+  revalidatePath(`/manage/contests/${contestId}`);
+}
+
+export async function hideWinners(formData: FormData) {
+  const supabase = await createClient();
+
+  // Get the current user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("User not authenticated");
+  }
+
+  const contestId = formData.get("contestId") as string;
+
+  if (!contestId) {
+    throw new Error("Contest ID is required");
+  }
+
+  // Update the contest to set winners_revealed_at to null and reopen submissions, but only if the user owns it
+  const { data, error } = await supabase
+    .from("contest")
+    .update({
+      winners_revealed_at: null,
+      submissions_closed_at: null,
+    })
+    .eq("id", contestId)
+    .eq("user_id", user.id) // Ensure user can only update their own contests
+    .select();
+
+  if (error) {
+    throw new Error("Failed to hide winners: " + error.message);
+  }
+
+  if (!data || data.length === 0) {
+    throw new Error(
+      "Contest not found or you don't have permission to hide winners",
+    );
+  }
+
+  // Revalidate the contest page to show the updated count date
+  revalidatePath(`/manage/contests/${contestId}`);
+}
+
+export async function closeSubmissions(formData: FormData) {
+  const supabase = await createClient();
+
+  // Get the current user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("User not authenticated");
+  }
+
+  const contestId = formData.get("contestId") as string;
+
+  if (!contestId) {
+    throw new Error("Contest ID is required");
+  }
+
+  // Update the contest to set submissions_closed_at to now, but only if the user owns it
+  const { data, error } = await supabase
+    .from("contest")
+    .update({ submissions_closed_at: new Date().toISOString() })
+    .eq("id", contestId)
+    .eq("user_id", user.id) // Ensure user can only update their own contests
+    .select();
+
+  if (error) {
+    throw new Error("Failed to close submissions: " + error.message);
+  }
+
+  if (!data || data.length === 0) {
+    throw new Error(
+      "Contest not found or you don't have permission to close submissions",
     );
   }
 
@@ -369,7 +333,7 @@ export async function unstartContest(formData: FormData) {
   revalidatePath(`/manage/contests/${contestId}`);
 }
 
-export async function endContest(formData: FormData) {
+export async function uncloseSubmissions(formData: FormData) {
   const supabase = await createClient();
 
   // Get the current user
@@ -388,22 +352,24 @@ export async function endContest(formData: FormData) {
     throw new Error("Contest ID is required");
   }
 
-  // Update the contest to set contest_ended_at to now, but only if the user owns it
+  // Update the contest to set submissions_closed_at to null, but only if the user owns it
   const { data, error } = await supabase
     .from("contest")
-    .update({ contest_ended_at: new Date().toISOString() })
+    .update({ submissions_closed_at: null })
     .eq("id", contestId)
     .eq("user_id", user.id) // Ensure user can only update their own contests
     .select();
 
   if (error) {
-    throw new Error("Failed to end contest: " + error.message);
+    throw new Error("Failed to reopen submissions: " + error.message);
   }
 
   if (!data || data.length === 0) {
-    throw new Error("Contest not found or you don't have permission to end it");
+    throw new Error(
+      "Contest not found or you don't have permission to reopen submissions",
+    );
   }
 
-  // Revalidate the contest page to show the updated end date
+  // Revalidate the contest page to show the updated status
   revalidatePath(`/manage/contests/${contestId}`);
 }

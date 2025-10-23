@@ -76,7 +76,7 @@ export default async function ContestDetailPage({
     .select("user_id")
     .eq("contest_id", contestId);
   const guestsSubmittedCount = new Set(
-    submittersData?.map((s) => s.user_id) || []
+    submittersData?.map((s) => s.user_id) || [],
   ).size;
 
   // Fetch unique guests who voted

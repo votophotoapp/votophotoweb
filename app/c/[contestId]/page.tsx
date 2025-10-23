@@ -106,7 +106,7 @@ export default async function ContestPage({ params }: ContestPageProps) {
       .eq("user_id", user.id)
       .in(
         "contest_submission_id",
-        allSubmissions.map((s) => s.id)
+        allSubmissions.map((s) => s.id),
       );
 
     if (votesData) {

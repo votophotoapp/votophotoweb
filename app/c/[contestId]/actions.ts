@@ -155,3 +155,116 @@ export async function getUserVotes(submissionId: string) {
     return new Set<string>();
   }
 }
+
+export async function submitPhoto(formData: FormData) {
+  try {
+    const supabase = await createClient();
+
+    // Check if user is authenticated
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    let currentUser = user;
+
+    if (!currentUser) {
+      // Sign in anonymously if not authenticated
+      const { data: signInData, error: signInError } =
+        await supabase.auth.signInAnonymously();
+      if (signInError) {
+        throw signInError;
+      }
+      currentUser = signInData.user;
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
+    }
+
+    const contestId = formData.get("contestId") as string;
+    const title = formData.get("title") as string;
+    const description = formData.get("description") as string;
+    const displayName = formData.get("displayName") as string;
+    const imageUrl = formData.get("imageUrl") as string;
+    const existingSubmissionId = formData.get("existingSubmissionId") as
+      | string
+      | null;
+
+    if (!contestId || !title || !displayName || !imageUrl) {
+      throw new Error("Missing required fields");
+    }
+
+    if (existingSubmissionId) {
+      // First verify the submission exists and belongs to this contest
+      const { data: existingCheck, error: checkError } = await supabase
+        .from("contest_submission")
+        .select("id, contest_id, user_id")
+        .eq("id", existingSubmissionId)
+        .eq("contest_id", contestId)
+        .single();
+
+      if (checkError || !existingCheck) {
+        throw new Error(
+          "Submission not found or does not belong to this contest",
+        );
+      }
+
+      // Check if user is the contest owner (manager) for update permissions
+      const { data: contestOwnerCheck } = await supabase
+        .from("contest")
+        .select("user_id")
+        .eq("id", contestId)
+        .eq("user_id", currentUser.id)
+        .single();
+
+      const isContestOwner = !!contestOwnerCheck;
+
+      // Update existing submission - owners can update any submission, regular users can only update their own
+      let updateQuery = supabase
+        .from("contest_submission")
+        .update({
+          title,
+          description,
+          image_url: imageUrl,
+          display_name: displayName.trim() || null,
+        })
+        .eq("id", existingSubmissionId)
+        .eq("contest_id", contestId); // Add contest_id filter for security
+
+      if (!isContestOwner) {
+        updateQuery = updateQuery.eq("user_id", currentUser.id);
+      }
+
+      const { error: dbError } = await updateQuery;
+
+      if (dbError) {
+        throw dbError;
+      }
+    } else {
+      // Create new submission
+      const { error: dbError } = await supabase
+        .from("contest_submission")
+        .insert({
+          contest_id: contestId,
+          title,
+          description,
+          image_url: imageUrl,
+          user_id: currentUser.id,
+          display_name: displayName.trim() || null,
+        });
+
+      if (dbError) {
+        throw dbError;
+      }
+    }
+
+    // Revalidate the contest page to show the new submission
+    revalidatePath(`/c/${contestId}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error submitting photo:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to submit photo";
+    return { success: false, error: errorMessage };
+  }
+}

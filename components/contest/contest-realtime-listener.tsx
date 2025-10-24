@@ -4,13 +4,13 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-interface ContestRealtimeListenerProps {
+interface ContestGuestRealtimeListenerProps {
   contestId: string;
 }
 
-export function ContestRealtimeListener({
+export function ContestGuestRealtimeListener({
   contestId,
-}: ContestRealtimeListenerProps) {
+}: ContestGuestRealtimeListenerProps) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -28,7 +28,7 @@ export function ContestRealtimeListener({
       },
       () => {
         router.refresh();
-      },
+      }
     );
 
     // Listen for contest category changes
@@ -42,7 +42,7 @@ export function ContestRealtimeListener({
       },
       () => {
         router.refresh();
-      },
+      }
     );
 
     // Listen for contest submission changes
@@ -56,7 +56,7 @@ export function ContestRealtimeListener({
       },
       () => {
         router.refresh();
-      },
+      }
     );
 
     channel.subscribe();

@@ -19,6 +19,7 @@ import Image from "next/image";
 import { generateId } from "@/lib/id-generator";
 import imageCompression from "browser-image-compression";
 import { ExistingSubmission } from "@/lib/database-types";
+import { submitPhoto } from "@/app/c/[contestId]/actions";
 
 interface SubmitPhotoFormProps {
   contestId: string;
@@ -146,68 +147,22 @@ export function SubmitPhotoForm({
         imageUrl = publicUrl;
       }
 
+      // Prepare form data for server action
+      const formData = new FormData();
+      formData.append("contestId", contestId);
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("displayName", name);
+      formData.append("imageUrl", imageUrl);
       if (existingSubmission) {
-        // First verify the submission exists and belongs to this contest
-        const { data: existingCheck, error: checkError } = await supabase
-          .from("contest_submission")
-          .select("id, contest_id")
-          .eq("id", existingSubmission.id)
-          .eq("contest_id", contestId)
-          .single();
+        formData.append("existingSubmissionId", existingSubmission.id);
+      }
 
-        if (checkError || !existingCheck) {
-          throw new Error(
-            "Submission not found or does not belong to this contest",
-          );
-        }
+      // Call server action
+      const result = await submitPhoto(formData);
 
-        // Check if user is the contest owner (manager) for update permissions
-        const { data: contestOwnerCheck } = await supabase
-          .from("contest")
-          .select("user_id")
-          .eq("id", contestId)
-          .eq("user_id", user.id)
-          .single();
-
-        const isContestOwner = !!contestOwnerCheck;
-
-        // Update existing submission - owners can update any submission, regular users can only update their own
-        let updateQuery = supabase
-          .from("contest_submission")
-          .update({
-            title,
-            description,
-            image_url: imageUrl,
-            display_name: name.trim() || null,
-          })
-          .eq("id", existingSubmission.id)
-          .eq("contest_id", contestId); // Add contest_id filter for security
-
-        if (!isContestOwner) {
-          updateQuery = updateQuery.eq("user_id", user.id);
-        }
-
-        const { error: dbError } = await updateQuery;
-
-        if (dbError) {
-          throw dbError;
-        }
-      } else {
-        // Create new submission
-        const { error: dbError } = await supabase
-          .from("contest_submission")
-          .insert({
-            contest_id: contestId,
-            title,
-            description,
-            image_url: imageUrl,
-            user_id: user?.id || null,
-            display_name: name.trim() || null,
-          });
-
-        if (dbError) {
-          throw dbError;
-        }
+      if (!result.success) {
+        throw new Error(result.error || "Failed to submit photo");
       }
 
       // Redirect back to appropriate page
@@ -227,7 +182,8 @@ export function SubmitPhotoForm({
       } else {
         router.push(`/c/${contestId}`);
       }
-    } catch {
+    } catch (error) {
+      console.error("Submission error:", error);
       alert("Failed to submit photo. Please try again.");
     } finally {
       setIsLoading(false);

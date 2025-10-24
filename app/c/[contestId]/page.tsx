@@ -11,7 +11,7 @@ import { GuestSubmissionItem } from "@/components/contest/guest-submission-item"
 import { YourVotes } from "@/components/contest/your-votes";
 import { Winners } from "@/components/contest/winners";
 import { getWinners, Winner } from "@/components/contest/winners-utils";
-import { ContestRealtimeListener } from "@/components/contest/contest-realtime-listener";
+import { ContestGuestRealtimeListener } from "@/components/contest/contest-guest-realtime-listener";
 
 export const dynamic = "force-dynamic";
 
@@ -106,7 +106,7 @@ export default async function ContestPage({ params }: ContestPageProps) {
       .eq("user_id", user.id)
       .in(
         "contest_submission_id",
-        allSubmissions.map((s) => s.id),
+        allSubmissions.map((s) => s.id)
       );
 
     if (votesData) {
@@ -128,7 +128,7 @@ export default async function ContestPage({ params }: ContestPageProps) {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <ContestRealtimeListener contestId={contestId} />
+      <ContestGuestRealtimeListener contestId={contestId} />
       <div className="max-w-5xl mx-auto space-y-8">
         <div>
           <h1 className="text-4xl font-bold mb-4">{contest.title}</h1>

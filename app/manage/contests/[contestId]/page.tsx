@@ -12,7 +12,7 @@ import { Winners } from "@/components/contest/winners";
 import { getBaseUrl } from "@/lib/utils";
 import { ContestSubmission } from "@/lib/database-types";
 import { getWinners } from "@/components/contest/winners-utils";
-import { ContestRealtimeListener } from "@/components/contest/contest-realtime-listener";
+import { ContestManagerRealtimeListener } from "@/components/contest/contest-manager-realtime-listener";
 
 export const dynamic = "force-dynamic";
 
@@ -76,7 +76,7 @@ export default async function ContestDetailPage({
     .select("user_id")
     .eq("contest_id", contestId);
   const guestsSubmittedCount = new Set(
-    submittersData?.map((s) => s.user_id) || [],
+    submittersData?.map((s) => s.user_id) || []
   ).size;
 
   // Fetch unique guests who voted
@@ -96,7 +96,7 @@ export default async function ContestDetailPage({
 
   return (
     <div className="container mx-auto py-4">
-      <ContestRealtimeListener contestId={contestId} />
+      <ContestManagerRealtimeListener contestId={contestId} />
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Contest Title Section */}
         <ContestTitle initialTitle={contest.title} contestId={contestId} />

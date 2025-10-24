@@ -1,57 +1,39 @@
 # VotoPhoto
 
-## 🚀 Check it out
+A modern photo contest platform built with Next.js and Supabase.
 
-**[Visit VotoPhoto.com](https://www.votophoto.com)** - Experience the live application deployed on Vercel!
+## 🚀 Live Demo
 
----
-
-## Overview
-
-VotoPhoto is a simple yet powerful photo contest application that allows users to participate in photography competitions, submit their entries, and vote on submissions. Built with modern web technologies, it provides a seamless experience for both contest organizers and participants.
+[Visit VotoPhoto.com](https://www.votophoto.com) - Experience the live application deployed on Vercel.
 
 ## Features
 
-### 🔐 Authentication & User Management
+- **User Authentication**: Secure login with Google OAuth
+- **Contest Management**: Create and manage photo contests with custom categories
+- **Photo Submissions**: Upload and submit photos to contests
+- **Voting System**: Vote on submissions across different categories
+- **Real-time Updates**: Live contest statistics and submissions
+- **Responsive Design**: Mobile-first UI built with Tailwind CSS
 
-- Secure user registration and login
-- Google OAuth integration with One-Tap sign-in
-- Protected routes and middleware
-
-### 📸 Photo Contest Platform
-
-- Browse and participate in photo contests
-- Submit photo entries (coming soon)
-- Vote on contest submissions (coming soon)
-- Real-time contest updates
-
-### 🎨 Modern UI/UX
-
-- Responsive design built with [Tailwind CSS](https://tailwindcss.com)
-- Beautiful components powered by [shadcn/ui](https://ui.shadcn.com/)
-- Mobile-first approach
-
-### ⚡ Performance & Scalability
-
-- Built on [Next.js 15](https://nextjs.org) with App Router
-- Server-side rendering and static generation
-- Turbopack for fast development builds
-- Optimized for production deployment
-
-## Architecture
-
-### Tech Stack
+## Tech Stack
 
 - **Frontend**: Next.js 15 (React 19) with TypeScript
-- **Backend**: Supabase (PostgreSQL database, Authentication, Real-time subscriptions)
+- **Backend**: Supabase (PostgreSQL, Authentication, Real-time)
 - **Styling**: Tailwind CSS with shadcn/ui components
-- **Deployment**: Vercel → [www.votophoto.com](https://www.votophoto.com)
+- **Deployment**: Vercel
 
-### Database Schema
+## Getting Started
 
-The application uses Supabase PostgreSQL with the following key tables:
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up Supabase project and configure environment variables
+4. Run development server: `npm run dev`
 
-- `contest` - Photo contest information
-- User profiles and authentication (managed by Supabase Auth)
-- Photo submissions (planned)
-- Voting records (planned)
+## Scripts
+
+- `npm run dev` - Start development server with Turbopack
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run type-check` - Run TypeScript type checking
+- `npm run format` - Format code with Prettier

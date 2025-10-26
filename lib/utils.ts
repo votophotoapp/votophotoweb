@@ -10,8 +10,8 @@ export function formatUtcToLocal(
 ) {
   if (!dateString) return "";
 
-  // dayjs() automatically uses the local timezone
-  return dayjs(dateString).format(format);
+  // Display in Eastern Time (EST/EDT)
+  return dayjs(dateString).tz('America/New_York').format(format);
 }
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
